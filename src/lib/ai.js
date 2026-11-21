@@ -88,7 +88,8 @@ const VERIFY_SCHEMA = {
   required: ['same_location_likely', 'is_clean', 'cleanliness_score', 'ai_generated_likelihood', 'looks_like_screenshot_or_stock', 'notes'],
 }
 
-function normalize(raw, location, source) {
+// Guardrail for model output: every field is clamped to a known value so bad AI output can't break the app.
+export function normalizeAnalysis(raw, location, source) {
   const cat = CATEGORIES.includes(raw.primary_category) ? raw.primary_category : 'swm'
   const ward = wardFor(location)
   return {
@@ -124,7 +125,7 @@ ${DEPT_LIST.map((d) => `- ${d.id}: ${d.name} — ${d.covers}`).join('\n')}
 Hazardous or medical items outrank general waste. Water bodies go to "water" unless it is a street drain ("drainage").
 Write complaint_text addressed to the officer of the department you picked (ward ${wardFor(location)}) in under 90 words: mention the landmark or area, include the GPS coordinates so the crew can find the spot, state the risks, and ask for cleanup within urgency_hours.`
       const raw = await callGemini([{ text: prompt }, await imagePart(dataUrl)], ANALYSIS_SCHEMA)
-      return normalize(raw, location, 'gemini')
+      return normalizeAnalysis(raw, location, 'gemini')
     } catch (err) {
       const demo = await demoAnalyze(dataUrl, location, landmark)
       return { ...demo, fallbackReason: err.message }
@@ -202,7 +203,7 @@ async function demoAnalyze(dataUrl, location, landmark) {
     complaint_text: `To the ${officerFor(cat, ward)}, ${DEPARTMENTS[cat].name}:\n\nA citizen has reported ${TITLE_BY_CAT[cat].toLowerCase()} at ${place} (severity ${severity}/10). Risks: ${HAZ_BY_CAT[cat].slice(0, 2).join(', ').toLowerCase()}. Kindly arrange cleanup within ${urgency} hours and upload proof on SaafSnap.\n\nThank you.`,
     confidence: 0.62,
   }
-  return normalize(raw, location, 'demo')
+  return normalizeAnalysis(raw, location, 'demo')
 }
 
 // Combines the model's opinion with hard signals (EXIF camera data, GPS distance, photo date).
@@ -220,12 +221,23 @@ Judge: is image 2 plausibly the same place (same landmarks/angle may differ)? Is
     }
   }
   if (!ai) ai = await demoVerify(beforeUrl, afterUrl, exif)
+  return { ...judgeCleanup({ ai, exif, here, report }), source }
+}
 
+const FAIL_HINT = {
+  real: 'This looks AI-made, edited or downloaded. Please take a real photo with your camera.',
+  place: "We couldn't match this to the reported spot. Stand where the original was taken and turn on location.",
+  clean: 'The spot still looks dirty. Finish the cleanup and try again.',
+  fresh: 'This photo was taken before the complaint. Please take a fresh one.',
+}
+
+// Pure decision step: turns the model's opinion plus hard signals into four pass/fail checks.
+export function judgeCleanup({ ai, exif, here, report, now = Date.now() }) {
   const hasCamera = !!(exif?.make || exif?.model)
   const gps = exif?.lat != null ? { lat: exif.lat, lng: exif.lng } : here
   const dist = gps ? distanceMeters(gps, report.location) : null
   const nearby = dist != null && dist <= 400
-  const fresh = exif?.takenAt ? exif.takenAt >= report.createdAt - 3600e3 && exif.takenAt <= Date.now() + 3600e3 : null
+  const fresh = exif?.takenAt ? exif.takenAt >= report.createdAt - 3600e3 && exif.takenAt <= now + 3600e3 : null
 
   const checks = [
     {
@@ -253,19 +265,12 @@ Judge: is image 2 plausibly the same place (same landmarks/angle may differ)? Is
       detail: exif?.takenAt ? `Taken ${new Date(exif.takenAt).toLocaleString()}` : 'No date in file, accepted',
     },
   ]
-  const FAIL_HINT = {
-    real: 'This looks AI-made, edited or downloaded. Please take a real photo with your camera.',
-    place: "We couldn't match this to the reported spot. Stand where the original was taken and turn on location.",
-    clean: 'The spot still looks dirty. Finish the cleanup and try again.',
-    fresh: 'This photo was taken before the complaint. Please take a fresh one.',
-  }
   const failed = checks.find((c) => !c.pass)
   return {
     verified: !failed,
     checks,
     cleanliness: ai.cleanliness_score,
     notes: failed ? FAIL_HINT[failed.id] : ai.notes,
-    source,
   }
 }
 

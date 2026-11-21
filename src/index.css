@@ -15,6 +15,16 @@
   h1, h2, h3, h4 {
     @apply font-display;
   }
+  /* Clear keyboard focus ring everywhere (mouse and touch clicks don't show it). */
+  a:focus-visible,
+  button:focus-visible,
+  [role='button']:focus-visible,
+  select:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid #10b981;
+    outline-offset: 3px;
+    border-radius: 0.75rem;
+  }
 }
 
 @layer components {
@@ -83,5 +93,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }

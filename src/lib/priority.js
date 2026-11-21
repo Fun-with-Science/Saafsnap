@@ -44,6 +44,18 @@ export function distanceMeters(a, b) {
   return 2 * R * Math.asin(Math.sqrt(s))
 }
 
+// Nearest open report within `radius` metres, so people back it instead of filing a duplicate.
+export function findDuplicate(loc, reports, radius = 150) {
+  if (!loc) return null
+  let best = null
+  for (const r of reports) {
+    if (r.status === 'cleaned') continue
+    const d = distanceMeters(loc, r.location)
+    if (d <= radius && (!best || d < best.d)) best = { r, d }
+  }
+  return best
+}
+
 export function timeAgo(ts, now = Date.now()) {
   const s = Math.max(1, Math.round((now - ts) / 1000))
   if (s < 60) return 'just now'

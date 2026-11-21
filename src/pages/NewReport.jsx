@@ -6,7 +6,7 @@ import { useStore } from '../lib/store'
 import { analyzeReport } from '../lib/ai'
 import { fileToDataUrl, readExif } from '../lib/image'
 import { DEPARTMENTS } from '../lib/departments'
-import { distanceMeters, priority } from '../lib/priority'
+import { findDuplicate, priority } from '../lib/priority'
 import PhotoPicker from '../components/PhotoPicker'
 import AiScanner from '../components/AiScanner'
 import { PickMap } from '../components/MapView'
@@ -39,8 +39,10 @@ export default function NewReport() {
       setLocState('ok')
     } else setLocState((s) => (s === 'ok' ? s : 'failed'))
   }
+  // Locate once when the page opens; later refreshes come from the "Use my location" button.
   useEffect(() => {
     locate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const pick = async (file) => {
@@ -72,14 +74,8 @@ export default function NewReport() {
   }
 
   const duplicate = useMemo(() => {
-    if (!loc || ignoreDup) return null
-    let best = null
-    for (const r of reports) {
-      if (r.status === 'cleaned') continue
-      const d = distanceMeters(loc, r.location)
-      if (d <= 150 && (!best || d < best.d)) best = { r, d }
-    }
-    return best
+    if (ignoreDup) return null
+    return findDuplicate(loc, reports)
   }, [loc, reports, ignoreDup])
 
   const [sending, setSending] = useState(false)

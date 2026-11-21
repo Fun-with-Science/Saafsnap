@@ -45,6 +45,8 @@ export function Photo({ src, alt, className = '', eager = false }) {
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
+      // React 18 only passes the lowercase attribute through to the browser.
+      // eslint-disable-next-line react/no-unknown-property
       fetchpriority={eager ? 'high' : 'auto'}
       draggable={false}
       onLoad={() => setLoaded(true)}

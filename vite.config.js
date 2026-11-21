@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173, host: true },
+  test: {
+    include: ['tests/**/*.test.{js,jsx}'],
+    environment: 'node',
+  },
   build: {
     rollupOptions: {
       output: {

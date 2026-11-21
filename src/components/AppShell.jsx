@@ -32,12 +32,15 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen md:pl-64">
+      <a href="#main" className="sr-only z-[1200] rounded-xl bg-ink px-4 py-2 font-bold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3">
+        Skip to content
+      </a>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r-2 border-ink/10 bg-white/80 p-5 backdrop-blur md:flex">
         <button onClick={() => navigate('/feed')} className="mb-8 text-left">
           <Logo withText />
         </button>
-        <nav className="flex flex-1 flex-col gap-1.5">
+        <nav aria-label="Main" className="flex flex-1 flex-col gap-1.5">
           {[...items, ...extra].map((it) =>
             it.primary ? (
               <NavLink key={it.to} to={it.to} onClick={hideHint} className="btn btn-primary relative my-2 w-full">
@@ -111,7 +114,7 @@ export default function AppShell() {
         </div>
       )}
 
-      <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-8">
+      <main id="main" tabIndex={-1} className="mx-auto outline-none max-w-6xl px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-8">
         {/* Enter-only animation: waiting for an exit animation could leave a blank page. */}
         <motion.div
           key={location.pathname}
@@ -129,7 +132,7 @@ export default function AppShell() {
       <LocationPrompt />
 
       {/* Mobile bottom nav */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink/10 bg-white/95 px-2 pt-1.5 backdrop-blur md:hidden">
+      <nav aria-label="Main" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink/10 bg-white/95 px-2 pt-1.5 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-md items-end justify-between">
           {items.map((it) =>
             it.primary ? (

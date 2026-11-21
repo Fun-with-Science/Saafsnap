@@ -7,15 +7,7 @@ import { withLike } from './reportOps'
 const Ctx = createContext(null)
 export const DATA_MODE = backend.mode
 
-export function pointsFor(userId, reports) {
-  let pts = 0
-  for (const r of reports) {
-    if (r.createdBy === userId) pts += 10
-    if (r.seenBy?.includes(userId)) pts += 2
-    if (r.status === 'cleaned' && r.cleanup?.by === userId) pts += 50 + (r.ai?.severity || 0) * 5
-  }
-  return pts
-}
+export { pointsFor } from './points'
 
 export function StoreProvider({ children }) {
   const [ready, setReady] = useState(false)

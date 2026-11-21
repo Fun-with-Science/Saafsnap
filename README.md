@@ -16,7 +16,7 @@ One photo of garbage, a dirty river or a choked drain. Gemini works out what it 
 ![Gemini](https://img.shields.io/badge/Gemini-API-8E75B2?logo=googlegemini&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
 
-### [▶ Open the live app](https://saafsnap.vercel.app) · [Demo logins](#demo-logins) · [2-minute demo guide](#demo-for-judges-2-minutes)
+### [▶ Open the live app](https://saafsnap.vercel.app) · [Demo logins](#demo-logins) · [2-minute demo guide](#demo-for-judges-2-minutes) · [How it's evaluated](#how-saafsnap-meets-the-evaluation-criteria)
 
 </div>
 
@@ -50,7 +50,7 @@ Best viewed on a phone (it works on desktop too).
 - The app asks for your location after login so the AI can tag where the photo was taken. You can say no and drop a pin on the map instead.
 - These are shared demo accounts. Please don't delete other people's reports.
 
-## Problem statement
+## Chosen vertical (problem statement)
 
 **PS03: GreenBin – Smart Waste Management Assistant**
 
@@ -64,6 +64,31 @@ SaafSnap is our answer to PS03: an AI assistant that helps citizens, NGOs and th
 | Make it visible | A public pollution map and feed show every open and cleaned spot |
 | Make sure it really gets cleaned | AI verifies the "after" photo (real, same place, recent, actually clean) before a spot turns green |
 | Keep people involved | Badges, points and a leaderboard reward NGOs, citizens and the government for verified cleanups |
+
+## Approach and logic
+
+SaafSnap is a smart assistant that makes decisions from the user's context: the photo, where they are, what's already been reported nearby, and who they are.
+
+| Context | Decision the app makes |
+|---|---|
+| **The photo** | Gemini returns structured JSON (waste types, severity 1–10, volume, hazards, environment, urgency). Every field is checked and clamped before use, so a bad AI answer can't break the app. |
+| **Where it is** (GPS, photo GPS or a pin) | Picks the ward, adds the coordinates to the complaint and gives Gemini local context (riverbank, market, main road). |
+| **Type of waste** | Routes to one of 7 departments. Medical and hazardous waste outrank general waste. River or pond waste goes to the water cell, street drains to drainage. |
+| **What's already reported nearby** | An open report within 150 m means you're asked to back it instead of filing a duplicate. |
+| **How many people saw it, and how long ago** | Priority = severity × (1 + ½·log₂(people who saw it)) + age. That drives the map colour and the order officers see. |
+| **Time since the report** | Every missed urgency window escalates the complaint: ward officer → senior engineer → commissioner. |
+| **The cleanup proof** | Four checks must pass: real camera photo (EXIF + AI), same place (GPS within 400 m or a visual match), actually clean (score ≥ 60), taken after the report. Any failure says exactly what to fix. |
+| **Who you are** | Citizens report and clean. NGOs and groups get public credit and their logo on the leaderboard. Verified officers get a department inbox. Admins approve organisations. |
+
+If Gemini is unreachable or rate-limited, the app tries other Gemini models, then falls back to an offline analyser, so a report is never lost.
+
+## Assumptions
+
+- The city is Kolkata. Wards (1–144) are estimated from coordinates; real ward boundaries would come from official GIS data.
+- The department list and escalation chains follow a typical Indian municipal structure.
+- Complaints are delivered to an officer's in-app desk; email or WhatsApp delivery is on the roadmap.
+- Some apps strip a photo's GPS and camera data. When that happens, the phone's live location and a visual check are used instead.
+- Demo report photos are real photos from Wikimedia Commons, not AI-generated.
 
 ## The problem
 
@@ -133,6 +158,37 @@ flowchart LR
 6. **Leaderboard**: NGOs vs government vs citizens. If the government is behind, the government sticker dozes off and the "Wake up, Government!" banner appears.
 7. **Admin**: log in with the [admin account](#demo-logins). It opens the Admin panel, where NGO and government sign-ups wait for approval.
 
+## Testing
+
+```bash
+npm test                 # 42 automated tests (Vitest)
+npm run lint             # ESLint
+npm run security-check   # 24 attack tests against the live Supabase backend
+```
+
+| Test file | What it proves |
+|---|---|
+| `tests/ai.test.js` | AI output is clamped to safe values; cleanup proof is rejected if it's far away, still dirty, too old or AI-made |
+| `tests/priority.test.js` | Priority grows with severity and crowd backing; escalation timing; real-world distance; duplicate detection within 150 m |
+| `tests/departments.test.js` | Ward assignment and escalation chains for every department |
+| `tests/reportOps.test.js` | Malformed database rows can't crash the app; who can back, like, start work or close a report |
+| `tests/rewards.test.js` | Points and badges |
+| `tests/auth.test.js` | Password hashing used in offline mode |
+| `tests/components.test.jsx` | One broken post doesn't break the feed; leaderboard bars are accessible and selectable |
+
+Every push to `main` runs lint, tests and a production build on GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). The app was also tested by hand on phone screens from 320 px wide.
+
+## How SaafSnap meets the evaluation criteria
+
+| Criterion | Where to look |
+|---|---|
+| **Problem statement alignment** | [Chosen vertical](#chosen-vertical-problem-statement) and [Approach and logic](#approach-and-logic): identify, route, prioritise, verify and reward, end to end |
+| **Code quality** | Small focused modules in `src/lib` (pure logic, no UI) and `src/components`; one backend interface with two implementations (Supabase and offline); ESLint clean |
+| **Security** | Row-level security, database-side actions, strict CSP and headers, sanitised data, automated attack tests. See [Security](#security) |
+| **Efficiency** | Photos compressed in the browser (≤ 960 px JPEG) before upload; lazy-loaded images; vendor code split into cached chunks; long-cache headers for assets; fast `flash-lite` model with a 15 s timeout; live updates debounced |
+| **Testing** | 42 unit and component tests, 24 security tests, CI on every push. See [Testing](#testing) |
+| **Accessibility** | Labelled buttons and navigation, alt text on report photos, visible keyboard focus, "Skip to content" link, honours the system "reduce motion" setting, large touch targets, works down to 320 px |
+
 ## Getting started
 
 ```bash
@@ -140,10 +196,9 @@ git clone https://github.com/Fun-with-Science/Saafsnap.git
 cd Saafsnap
 npm install
 cp .env.example .env   # then fill in the values below
-npm run dev
+npm run dev            # http://localhost:5173
+npm test               # run the test suite
 ```
-
-Open http://localhost:5173.
 
 ### Environment variables
 
@@ -193,13 +248,16 @@ src/
     departments.js  Department directory, ward + escalation chain
     priority.js     Priority score, escalation timing, distances
     badges.js       Badge rules
-    reportOps.js    Report state changes (offline backend)
+    reportOps.js    Report state changes and sanitising of database rows
+    points.js       Points rules
     backend/        supabase.js (shared) and local.js (offline)
     store.jsx       App state, actions, badge celebrations
 supabase/           setup.sql (schema + security), create-admin.sql, make-admin.sql,
                     showcase-data.sql, remove-demo-data.sql
   upgrades/         one-time scripts for projects created with an older setup.sql
+tests/              Vitest unit and component tests
 scripts/            security-check.mjs (automated attack tests against the live backend)
+.github/workflows/  CI: lint, tests and build on every push
 public/stickers/    Government character stickers
 public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
 ```
