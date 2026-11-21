@@ -10,7 +10,7 @@ export const ORG_COLORS = ['#0ea5e9', '#8b5cf6', '#f59e0b', '#14b8a6', '#f43f5e'
 export function GovtMascot({ mood = 'sleepy', size = 80 }) {
   const sleepy = mood === 'sleepy'
   const face = size < 84
-  const src = `/stickers/govt-${sleepy ? 'calm' : 'pointing'}${face ? '-face' : ''}.png`
+  const src = `/stickers/govt-${sleepy ? 'calm' : 'pointing'}${face ? '-face' : ''}.webp`
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <motion.div

@@ -41,11 +41,13 @@ SaafSnap turns a messy, real-world input (a phone photo and a location) into a s
 
 - **Snap flow:** camera or gallery, GPS / photo GPS / tap-the-map location, animated AI scan, routed complaint letter
 - **Duplicate detection:** reports within 150 m prompt you to back the existing one instead
-- **Instagram-style feed:** double-tap a photo for "I saw this too"
+- **Instagram-style feed:** one clean column of posts; double-tap a photo for "I saw this too"
+- **Settings → Your activity:** what you reported, cleaned and backed, plus location and account settings
 - **Pollution map:** priority-coloured pins and heat circles, pulsing critical spots, "near me"
 - **Before / after slider** on every cleaned report
 - **Animated leaderboard:** who cleans most (government vs NGOs vs citizens), a per-department government report card, and top people
 - **Badges and points** with celebration animations
+- **Login:** email or **Continue with Google**; asks for location right after login
 - **Roles:** Citizen (instant), NGO / Government / Group (verified by an admin)
 - **Government desk:** an officer's own department inbox, overdue alerts and "start work"
 - **Admin panel:** approve or reject organisations, moderate reports, load demo data
@@ -92,21 +94,33 @@ Open http://localhost:5173.
 | `VITE_GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/) → API keys | No: without it a built-in offline analyser is used |
 | `VITE_GEMINI_MODEL` | Defaults to `gemini-3.5-flash` | No |
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | No: without it data stays in the browser |
-| `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API (anon public key) | No |
+| `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API Keys (publishable key, `sb_publishable_...`) | No |
 
 The sidebar shows which AI and data mode is active.
 
 ### Supabase setup
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage, realtime and the demo accounts. It's safe to run again. If you ran an older copy of it, also run [`supabase/grants.sql`](supabase/grants.sql): new Supabase projects don't give the app access to new tables automatically.
-3. For quick testing, turn off **Authentication → Sign In / Providers → Email → Confirm email**.
-4. Put the project URL and anon key in `.env` and restart `npm run dev`.
-5. Log in as the admin and click **Load demo reports** on the Admin page.
+2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage and realtime. It's safe to run again. If you ran an older copy of it, also run [`supabase/grants.sql`](supabase/grants.sql): new Supabase projects don't give the app access to new tables automatically.
+3. Turn off **Authentication → Sign In / Providers → Email → Confirm email** if you want new users to log in without clicking an email link.
+4. Put the project URL and publishable (anon) key in `.env` and restart `npm run dev`.
+5. Sign up in the app with your own account, then run [`supabase/make-admin.sql`](supabase/make-admin.sql) with your email to become the admin.
 
-## Demo accounts
+Projects set up with an older `setup.sql` also contain demo accounts (`@saafsnap.demo`). After step 5, run [`supabase/remove-demo-data.sql`](supabase/remove-demo-data.sql) to delete them and their reports.
 
-The login page has one-tap demo buttons.
+### Continue with Google
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), set up the **OAuth consent screen** (Google Auth Platform → Branding / Audience), then create an **OAuth client ID** of type **Web application**.
+2. Add **Authorised JavaScript origins**: `http://localhost:5173` and your live site, for example `https://saafsnap.vercel.app`.
+3. Add **Authorised redirect URI**: `https://<your-project-ref>.supabase.co/auth/v1/callback`.
+4. In Supabase, go to **Authentication → Sign In / Providers → Google**, turn it on and paste the Client ID and Client Secret.
+5. In Supabase, go to **Authentication → URL Configuration**, set **Site URL** to your live site and add `http://localhost:5173/**` and `https://<your-site>/**` to **Redirect URLs**.
+
+The Client Secret only goes into Supabase. It never goes in `.env` or the app code.
+
+## Offline demo mode
+
+Without Supabase settings, the app runs entirely in the browser with 19 demo reports and these demo logins (one-tap buttons on the login page):
 
 | Role | Email | Password |
 |---|---|---|
@@ -114,18 +128,15 @@ The login page has one-tap demo buttons.
 | Citizen | `citizen@saafsnap.demo` | `demo1234` |
 | NGO | `greenganga@saafsnap.demo` | `demo1234` |
 | Government (Solid Waste) | `swm@saafsnap.demo` | `demo1234` |
-| Government (Water) | `water@saafsnap.demo` | `demo1234` |
-| Pending government (to test approval) | `health@saafsnap.demo` | `demo1234` |
-| Pending NGO (to test approval) | `rakshak@saafsnap.demo` | `demo1234` |
 
-Change these passwords before deploying publicly.
+These exist only in offline demo mode, not in the live Supabase app.
 
 ## Project structure
 
 ```
 src/
   pages/            Landing, Login, Signup, Feed, NewReport, ReportDetail,
-                    MapPage, Leaders, Profile, DeptDesk, Admin
+                    MapPage, Leaders, Profile, Settings, Activity, DeptDesk, Admin
   components/       AppShell, ReportCard, MapView, LeaderChart, Stickers,
                     AiScanner, PhotoPicker, Celebration, ui (shared pieces)
   lib/
@@ -136,7 +147,7 @@ src/
     reportOps.js    Report state changes (offline backend)
     backend/        supabase.js (shared) and local.js (offline)
     store.jsx       App state, actions, badge celebrations
-supabase/setup.sql  Database schema, security rules, demo accounts
+supabase/           setup.sql (schema + security), make-admin.sql, grants.sql, remove-demo-data.sql
 public/stickers/    Government character stickers
 public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
 ```

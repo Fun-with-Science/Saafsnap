@@ -166,39 +166,5 @@ do $$ begin
   alter publication supabase_realtime add table public.reports, public.profiles;
 exception when duplicate_object then null; end $$;
 
--- ───────────── Demo accounts (passwords are listed in README.md) ─────────────
-do $$
-declare u record; uid uuid;
-begin
-  for u in select * from (values
-    ('admin@saafsnap.demo', 'admin1234', 'SaafSnap Admin', 'admin', 'active', null::jsonb),
-    ('swm@saafsnap.demo', 'demo1234', 'R. Banerjee', 'govt', 'active', '{"name":"Solid Waste Management Dept.","department":"swm","regId":"EMP-SWM-0412","city":"Kolkata"}'::jsonb),
-    ('water@saafsnap.demo', 'demo1234', 'S. Ghosh', 'govt', 'active', '{"name":"Water Bodies & Pollution Control","department":"water","regId":"EMP-WTR-0198","city":"Kolkata"}'::jsonb),
-    ('drainage@saafsnap.demo', 'demo1234', 'A. Mondal', 'govt', 'active', '{"name":"Sewerage & Drainage Dept.","department":"drainage","regId":"EMP-DRN-0077","city":"Kolkata"}'::jsonb),
-    ('health@saafsnap.demo', 'demo1234', 'P. Sen', 'govt', 'pending', '{"name":"Bio-medical Waste Cell","department":"health","regId":"EMP-HLT-0331","city":"Kolkata"}'::jsonb),
-    ('greenganga@saafsnap.demo', 'demo1234', 'Green Ganga Collective', 'ngo', 'active', '{"name":"Green Ganga Collective","regId":"NGO/WB/2019/0231","city":"Kolkata","color":"#0ea5e9","icon":"waves"}'::jsonb),
-    ('pals@saafsnap.demo', 'demo1234', 'Plastic-Free Pals', 'ngo', 'active', '{"name":"Plastic-Free Pals","regId":"NGO/WB/2021/0877","city":"Kolkata","color":"#8b5cf6","icon":"recycle"}'::jsonb),
-    ('streets@saafsnap.demo', 'demo1234', 'Clean Streets Kolkata', 'ngo', 'active', '{"name":"Clean Streets Kolkata","regId":"NGO/WB/2020/0540","city":"Kolkata","color":"#f59e0b","icon":"sparkles"}'::jsonb),
-    ('rakshak@saafsnap.demo', 'demo1234', 'River Rakshak Trust', 'ngo', 'pending', '{"name":"River Rakshak Trust","regId":"NGO/WB/2024/1120","city":"Kolkata","color":"#14b8a6","icon":"droplets"}'::jsonb),
-    ('ecoclub@saafsnap.demo', 'demo1234', 'Campus Eco Club', 'group', 'active', '{"name":"Campus Eco Club","regId":"CLUB-2023-14","city":"Kolkata","color":"#f43f5e","icon":"users"}'::jsonb),
-    ('citizen@saafsnap.demo', 'demo1234', 'Ananya Roy', 'citizen', 'active', null::jsonb),
-    ('rahul@saafsnap.demo', 'demo1234', 'Rahul Das', 'citizen', 'active', null::jsonb),
-    ('imran@saafsnap.demo', 'demo1234', 'Imran Sheikh', 'citizen', 'active', null::jsonb),
-    ('priya@saafsnap.demo', 'demo1234', 'Priya Nair', 'citizen', 'active', null::jsonb)
-  ) as t(email, pw, name, role, status, org)
-  loop
-    if exists (select 1 from auth.users where email = u.email) then continue; end if;
-    uid := gen_random_uuid();
-    insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-      raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
-      confirmation_token, email_change, email_change_token_new, recovery_token)
-    values ('00000000-0000-0000-0000-000000000000', uid, 'authenticated', 'authenticated', u.email,
-      extensions.crypt(u.pw, extensions.gen_salt('bf')), now(),
-      '{"provider":"email","providers":["email"]}', jsonb_build_object('name', u.name), now(), now(),
-      '', '', '', '');
-    insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
-    values (gen_random_uuid(), uid, uid::text,
-      jsonb_build_object('sub', uid::text, 'email', u.email, 'email_verified', true), 'email', now(), now(), now());
-    update public.profiles set role = u.role, status = u.status, org = u.org where id = uid;
-  end loop;
-end $$;
+-- ───────────── Your admin account ─────────────
+-- Sign up in the app first (Google or email), then run supabase/make-admin.sql with your email.

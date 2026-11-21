@@ -6,6 +6,7 @@ import Logo from '../components/Logo'
 import { useStore } from '../lib/store'
 import { pageMotion, Spinner, IconBox } from '../components/ui'
 import { DEMO_PASSWORD, ADMIN_PASSWORD } from '../lib/seed'
+import GoogleButton from '../components/GoogleButton'
 
 const DEMO = [
   { email: 'citizen@saafsnap.demo', password: DEMO_PASSWORD, label: 'Citizen', icon: User, color: 'leaf', tone: 'bg-leaf-50' },
@@ -15,7 +16,7 @@ const DEMO = [
 ]
 
 export default function Login() {
-  const { login } = useStore()
+  const { login, dataMode } = useStore()
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
@@ -52,7 +53,10 @@ export default function Login() {
         <div className="card p-6 sm:p-8">
           <h1 className="text-3xl font-extrabold">Welcome back</h1>
           <p className="mt-1 font-semibold text-ink/55">Log in to report and track spots.</p>
-          <form onSubmit={submit} className="mt-6 space-y-4">
+          <div className="mt-6">
+            <GoogleButton />
+          </div>
+          <form onSubmit={submit} className="space-y-4">
             <div>
               <label className="label" htmlFor="email">Email</label>
               <input id="email" className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
@@ -80,8 +84,9 @@ export default function Login() {
           </p>
         </div>
 
+        {dataMode === 'local' && (
         <div className="card-soft mt-5 p-5">
-          <div className="text-sm font-extrabold uppercase tracking-wider text-ink/45">Quick demo login</div>
+          <div className="text-sm font-extrabold uppercase tracking-wider text-ink/45">Quick demo login (offline demo)</div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {DEMO.map((d) => (
               <button key={d.email} disabled={busy} onClick={() => attempt(d.email, d.password)}
@@ -91,6 +96,7 @@ export default function Login() {
             ))}
           </div>
         </div>
+        )}
       </div>
     </motion.div>
   )

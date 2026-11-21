@@ -33,9 +33,11 @@ export default function Admin() {
           <h1 className="text-3xl font-extrabold md:text-4xl">Admin panel</h1>
           <p className="font-semibold text-ink/55">Verify organisations and keep the feed honest.</p>
         </div>
-        <button className="btn btn-white btn-sm" onClick={() => setConfirm({ kind: 'reset' })}>
-          <RotateCcw size={16} /> {shared ? 'Load demo reports' : 'Reset demo data'}
-        </button>
+        {!shared && (
+          <button className="btn btn-white btn-sm" onClick={() => setConfirm({ kind: 'reset' })}>
+            <RotateCcw size={16} /> Reset demo data
+          </button>
+        )}
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -154,23 +156,17 @@ export default function Admin() {
         )}
         {confirm?.kind === 'reset' && (
           <>
-            <h2 className="pr-8 text-2xl font-extrabold">{shared ? 'Load the demo reports?' : 'Reset all demo data?'}</h2>
+            <h2 className="pr-8 text-2xl font-extrabold">Reset all demo data?</h2>
             <p className="mt-2 font-semibold text-ink/60">
-              {shared
-                ? 'Every report in the shared database is deleted for everyone and replaced with the 19 Kolkata demo reports. Accounts are kept. This cannot be undone.'
-                : "Every account and report created on this device will be deleted and the original demo data restored. You'll be logged out."}
+              Every account and report created on this device will be deleted and the original demo data restored. You'll be logged out.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button className="btn btn-white" onClick={() => setConfirm(null)}>Cancel</button>
               <button className="btn btn-coral" onClick={async () => {
                 setConfirm(null)
-                try {
-                  await resetDemo()
-                  navigate(shared ? '/feed' : '/')
-                } catch {
-                  /* the store shows the error toast */
-                }
-              }}>{shared ? 'Load' : 'Reset'}</button>
+                await resetDemo()
+                navigate('/')
+              }}>Reset</button>
             </div>
           </>
         )}

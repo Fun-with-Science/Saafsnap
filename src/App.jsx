@@ -13,6 +13,8 @@ import ReportDetail from './pages/ReportDetail'
 import MapPage from './pages/MapPage'
 import Leaders from './pages/Leaders'
 import Profile from './pages/Profile'
+import Settings from './pages/Settings'
+import Activity from './pages/Activity'
 import DeptDesk from './pages/DeptDesk'
 import Admin from './pages/Admin'
 
@@ -53,6 +55,8 @@ export default function App() {
             <Route path="/map" element={<MapPage />} />
             <Route path="/leaders" element={<Leaders />} />
             <Route path="/me" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/activity" element={<Activity />} />
             <Route path="/desk" element={<RequireAuth role="govt"><DeptDesk /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth role="admin"><Admin /></RequireAuth>} />
           </Route>

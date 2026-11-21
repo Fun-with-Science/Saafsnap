@@ -6,7 +6,7 @@ import { escalation, duration } from '../lib/priority'
 import { earnedBadgeIds, BADGE_MAP } from '../lib/badges'
 import LeaderChart from '../components/LeaderChart'
 import { GovtMascot, OrgLogo, CitizenHero, UserAvatar } from '../components/Stickers'
-import { IconBox } from '../components/ui'
+import { IconBox, EmptyState } from '../components/ui'
 import { Trophy, Landmark, Star, Medal } from 'lucide-react'
 
 const TABS = [
@@ -87,12 +87,14 @@ export default function Leaders() {
           <div className="card overflow-hidden bg-gradient-to-b from-white to-leaf-50 p-4 sm:p-8">
             <div className="text-center">
               <h2 className="text-2xl font-extrabold sm:text-3xl">Who's cleaning the city?</h2>
-              <p className="text-sm font-bold text-ink/50">Verified cleanups, all time</p>
+              <p className="text-sm font-bold text-ink/50">
+                {teams.some((t) => t.value > 0) ? 'Verified cleanups, all time' : 'No verified cleanups yet. Clean a reported spot to get on the board!'}
+              </p>
             </div>
             <LeaderChart items={teams} />
           </div>
           {govtRank > 1 && (
-            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }} className="card flex items-center gap-4 bg-sky2-100 p-4">
+            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="card flex items-center gap-4 bg-sky2-100 p-4">
               <div className="shrink-0">
                 <GovtMascot mood="sleepy" size={72} />
               </div>
@@ -109,6 +111,11 @@ export default function Leaders() {
 
       {tab === 'govt' && (
         <motion.div key="govt" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 grid gap-4 md:grid-cols-2">
+          {deptCards.length === 0 && (
+            <div className="md:col-span-2">
+              <EmptyState icon={Landmark} color="sky" title="No complaints yet" text="Each department's report card appears here once citizens start reporting." />
+            </div>
+          )}
           {deptCards.map(({ d, total, cleaned, byGovt, byOthers, overdue, avg }, i) => {
             const pct = Math.round((byGovt / total) * 100)
             return (
@@ -142,6 +149,7 @@ export default function Leaders() {
 
       {tab === 'people' && (
         <motion.ol key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 space-y-2">
+          {people.length === 0 && <EmptyState icon={Star} color="sun" title="No one on the board yet" text="Report or clean a spot to earn points and appear here." />}
           {people.map(({ u, pts, badges }, i) => (
             <motion.li key={u.id} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
               className={`card-soft flex items-center gap-3 p-3 ${i < 3 ? 'border-2 border-ink' : ''}`}>

@@ -166,6 +166,7 @@ export function StoreProvider({ children }) {
     userById: (id) => users.find((u) => u.id === id) || null,
     signup,
     login,
+    loginWithGoogle: backend.loginWithGoogle,
     logout,
     createReport: (input) => act((u) => backend.createReport(u, input)),
     confirmSeen: (id) => act((u) => backend.back(u, id)).catch(() => {}),

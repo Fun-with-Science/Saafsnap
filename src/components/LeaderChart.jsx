@@ -16,20 +16,20 @@ export default function LeaderChart({ items, unit = 'cleanups' }) {
                 style={{ background: `linear-gradient(to top, ${it.color}, ${it.color}88)`, boxShadow: '0 4px 0 #17324d' }}
                 initial={{ height: '0%' }}
                 animate={{ height: `${h}%` }}
-                transition={{ delay: 0.15 + i * 0.12, type: 'spring', stiffness: 90, damping: 14 }}
+                transition={{ delay: i * 0.05, type: 'spring', stiffness: 140, damping: 16 }}
               >
                 <span className="absolute inset-y-6 left-[18%] w-[14%] rounded-full bg-white/35" />
                 <motion.div
                   className="absolute left-1/2 top-0 grid place-items-center rounded-full border-2 border-ink bg-white"
                   style={{ x: '-50%', y: '-50%', width: 'clamp(52px, 120%, 92px)', aspectRatio: '1', boxShadow: '0 4px 0 #17324d' }}
-                  initial={{ scale: 0, rotate: -40 }}
+                  initial={{ scale: 0.6, rotate: -25 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.55 + i * 0.12, type: 'spring', stiffness: 260, damping: 12 }}
+                  transition={{ delay: i * 0.05, type: 'spring', stiffness: 320, damping: 14 }}
                   whileHover={{ scale: 1.12, rotate: [0, -6, 6, 0] }}
                 >
                   {it.sticker}
                   {i === 0 && it.value > 0 && (
-                    <motion.span className="absolute -top-4 grid h-7 w-7 place-items-center rounded-full border-2 border-ink bg-sun-400 text-ink" initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 + i * 0.12 }}>
+                    <motion.span className="absolute -top-4 grid h-7 w-7 place-items-center rounded-full border-2 border-ink bg-sun-400 text-ink" initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
                       <Crown size={15} strokeWidth={2.6} />
                     </motion.span>
                   )}

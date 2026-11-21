@@ -1,34 +1,33 @@
 import { useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LogOut, Clock, BadgeCheck, Star, Medal, Camera, Sparkles } from 'lucide-react'
+import { Clock, BadgeCheck, Star, Medal, Camera, Sparkles, Settings } from 'lucide-react'
 import { useStore, pointsFor } from '../lib/store'
 import { BADGES, badgeProgress } from '../lib/badges'
 import { UserAvatar } from '../components/Stickers'
-import { StatTile, EmptyState, IconBox } from '../components/ui'
-import ReportCard from '../components/ReportCard'
+import { StatTile, IconBox } from '../components/ui'
 
-const ROLE = { citizen: 'Citizen', ngo: 'NGO', govt: 'Government officer', group: 'Group', admin: 'Admin' }
+export const ROLE = { citizen: 'Citizen', ngo: 'NGO', govt: 'Government officer', group: 'Group', admin: 'Admin' }
 
 export default function Profile() {
-  const { me, reports, users, logout } = useStore()
-  const navigate = useNavigate()
+  const { me, reports, users } = useStore()
   const progress = useMemo(() => badgeProgress(me.id, reports), [me.id, reports])
   const points = pointsFor(me.id, reports)
-  const mine = reports.filter((r) => r.createdBy === me.id)
-  const cleaned = reports.filter((r) => r.cleanup?.by === me.id)
-  const backed = reports.filter((r) => r.seenBy.includes(me.id)).length
+  const reported = reports.filter((r) => r.createdBy === me.id).length
+  const cleaned = reports.filter((r) => r.cleanup?.by === me.id).length
   const rank = useMemo(() => {
     const all = users.filter((u) => u.role !== 'admin').map((u) => pointsFor(u.id, reports)).sort((a, b) => b - a)
     return all.indexOf(points) + 1
   }, [users, reports, points])
-  const activity = [...cleaned, ...mine.filter((r) => !cleaned.includes(r))].sort((a, b) => b.createdAt - a.createdAt)
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card relative overflow-hidden p-6">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-leaf-100" />
-        <div className="relative flex flex-wrap items-center gap-4">
+        <Link to="/settings" className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-2xl border-2 border-ink bg-white shadow-popsm transition hover:bg-leaf-50 active:translate-y-[2px] active:shadow-none" aria-label="Settings">
+          <Settings size={22} />
+        </Link>
+        <div className="relative flex flex-wrap items-center gap-4 pr-12">
           <motion.div initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 14 }}>
             <UserAvatar user={me} size={84} />
           </motion.div>
@@ -42,20 +41,16 @@ export default function Profile() {
                 ) : (
                   <span className="chip bg-sun-100 text-amber-700"><Clock size={14} /> Verification pending</span>
                 ))}
-              <span className="text-sm font-bold text-ink/50">{me.email}</span>
             </div>
           </div>
-          <button className="btn btn-white btn-sm" onClick={() => { logout(); navigate('/') }}>
-            <LogOut size={16} /> Log out
-          </button>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatTile icon={Star} label="Points" value={points} color="sun" />
-        <StatTile icon={Medal} label="City rank" value={`#${rank}`} color="grape" delay={0.05} />
-        <StatTile icon={Camera} label="Reported" value={mine.length} color="sky" delay={0.1} />
-        <StatTile icon={Sparkles} label="Cleaned" value={cleaned.length} color="leaf" delay={0.15} />
+        <StatTile icon={Medal} label="City rank" value={rank ? `#${rank}` : '-'} color="grape" delay={0.05} />
+        <StatTile icon={Camera} label="Reported" value={reported} color="sky" delay={0.1} />
+        <StatTile icon={Sparkles} label="Cleaned" value={cleaned} color="leaf" delay={0.15} />
       </div>
 
       <section>
@@ -79,18 +74,6 @@ export default function Profile() {
             )
           })}
         </div>
-        <p className="mt-2 text-xs font-bold text-ink/45">Points: 10 per report, 2 per "I saw this too" ({backed} so far), 50+ per verified cleanup (more for severe spots).</p>
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-2xl font-extrabold">My activity</h2>
-        {activity.length === 0 ? (
-          <EmptyState icon={Camera} color="sky" title="No activity yet" text="Report a spot or clean one to see it here." action={<Link to="/snap" className="btn btn-primary">Snap a spot</Link>} />
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {activity.map((r, i) => <ReportCard key={r.id} report={r} index={i} />)}
-          </div>
-        )}
       </section>
     </div>
   )

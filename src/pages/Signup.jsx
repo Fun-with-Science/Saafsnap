@@ -7,6 +7,7 @@ import { useStore } from '../lib/store'
 import { DEPT_LIST } from '../lib/departments'
 import { ORG_COLORS, ORG_ICON_KEYS, OrgLogo } from '../components/Stickers'
 import { pageMotion, Spinner, IconBox } from '../components/ui'
+import GoogleButton from '../components/GoogleButton'
 
 const ROLES = [
   { id: 'citizen', icon: User, color: 'leaf', title: 'Citizen', text: 'Report spots, back others, clean up and earn badges.', tone: 'bg-leaf-100', verify: false },
@@ -16,7 +17,7 @@ const ROLES = [
 ]
 
 export default function Signup() {
-  const { signup } = useStore()
+  const { signup, dataMode } = useStore()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [role, setRole] = useState(null)
@@ -104,6 +105,10 @@ export default function Signup() {
           <AnimatePresence mode="wait">
             {step === 0 ? (
               <motion.div key="role" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <div className="mb-1">
+                  <GoogleButton label="Sign up with Google" />
+                  {dataMode === 'supabase' && <p className="-mt-3 mb-4 text-center text-xs font-bold text-ink/45">Google sign-up creates a Citizen account. NGOs and government staff, use the form below.</p>}
+                </div>
                 <h1 className="text-3xl font-extrabold">Who are you?</h1>
                 <p className="mt-1 font-semibold text-ink/55">Pick one. You can't change this later.</p>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">

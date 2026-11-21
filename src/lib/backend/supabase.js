@@ -1,6 +1,5 @@
 // Shared, multi-device storage. Run supabase/setup.sql once before using it.
 import { createClient } from '@supabase/supabase-js'
-import { buildSeedReports, USERS } from '../seed'
 import { newId } from '../auth'
 import { newReport } from '../reportOps'
 
@@ -45,7 +44,6 @@ const toReport = (r) => ({
 
 const toRow = (r) => ({
   created_by: r.createdBy,
-  created_at: new Date(r.createdAt).toISOString(),
   photo: r.photo,
   lat: r.location.lat,
   lng: r.location.lng,
@@ -109,14 +107,18 @@ export const supabaseBackend = {
     return data.user.id
   },
 
+  // Redirects to Google; the session is picked up from the URL when the app reloads.
+  async loginWithGoogle() {
+    must(await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/feed` } }))
+  },
+
   async logout() {
     await sb.auth.signOut()
   },
 
   async createReport(me, input) {
     const photo = await uploadPhoto(input.photo, me.id)
-    const { created_at, ...row } = toRow(newReport(me, { ...input, photo }))
-    return toReport(must(await sb.from('reports').insert(row).select().single()))
+    return toReport(must(await sb.from('reports').insert(toRow(newReport(me, { ...input, photo }))).select().single()))
   },
 
   async back(_me, id) {
@@ -138,16 +140,6 @@ export const supabaseBackend = {
 
   async removeReport(id) {
     must(await sb.from('reports').delete().eq('id', id))
-  },
-
-  // Admin only: replaces every report with the demo set, owned by the demo accounts.
-  async resetDemo() {
-    const { users } = await load()
-    const byEmail = Object.fromEntries(users.filter((u) => u.email).map((u) => [u.email, u.id]))
-    const ids = Object.fromEntries(USERS.map((u) => [u.key, byEmail[u.email]]))
-    if (Object.values(ids).some((v) => !v)) throw new Error('Demo accounts are missing. Run supabase/setup.sql first.')
-    must(await sb.from('reports').delete().not('id', 'is', null))
-    must(await sb.from('reports').insert(buildSeedReports(ids).map(toRow)))
   },
 
   subscribe(onChange) {
