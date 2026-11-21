@@ -29,7 +29,7 @@ export default function Leaders() {
       .map((u) => ({ u, n: reports.filter((r) => r.status === 'cleaned' && r.cleanup.by === u.id).length }))
       .filter((o) => o.n > 0)
     const list = [
-      { key: 'govt', label: 'Government', value: govt, color: '#3b82f6', kind: 'govt' },
+      { key: 'govt', label: 'Government', short: 'Govt', value: govt, color: '#3b82f6', kind: 'govt' },
       { key: 'citizens', label: 'Citizens', value: citizens, color: '#10b981', kind: 'citizen' },
       ...orgs.map((o) => ({ key: o.u.id, label: o.u.org.name, value: o.n, color: o.u.org.color, org: o.u.org, avatar: o.u.avatar })),
     ].sort((a, b) => b.value - a.value)

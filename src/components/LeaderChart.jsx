@@ -30,23 +30,24 @@ export default function LeaderChart({ items, unit = 'cleanups' }) {
         </AnimatePresence>
       </div>
 
-      <div className="flex h-[300px] items-end justify-around gap-1.5 pt-12 sm:h-[340px] sm:gap-4">
-        {items.map((it, i) => {
-          const h = 16 + (it.value / max) * 76
-          const on = it.key === sel?.key
-          return (
-            <button
-              type="button"
-              key={it.key}
-              onClick={() => setPicked(it.key)}
-              aria-pressed={on}
-              aria-label={`${it.label}, ${it.value} ${unit}`}
-              className="flex h-full min-w-0 max-w-[120px] flex-1 flex-col items-center justify-end outline-none"
-            >
-              <div className="relative flex w-full flex-1 items-end justify-center">
+      {/* Bars stand on one shared floor so every bottom lines up, whatever the label length. */}
+      <div className="relative pt-12">
+        <div className="flex h-[220px] items-end justify-around gap-0.5 sm:h-[260px] sm:gap-4">
+          {items.map((it, i) => {
+            const h = 16 + (it.value / max) * 76
+            const on = it.key === sel?.key
+            return (
+              <button
+                type="button"
+                key={it.key}
+                onClick={() => setPicked(it.key)}
+                aria-pressed={on}
+                aria-label={`${it.label}, ${it.value} ${unit}`}
+                className="flex h-full min-w-0 max-w-[120px] flex-1 items-end justify-center outline-none"
+              >
                 <motion.div
-                  className="relative w-[72%] min-w-[40px] max-w-[84px] rounded-full border-2 border-ink"
-                  style={{ background: `linear-gradient(to top, ${it.color}, ${it.color}88)`, boxShadow: on ? `0 0 0 4px ${it.color}55, 0 4px 0 #17324d` : '0 4px 0 #17324d' }}
+                  className="relative w-[72%] min-w-[40px] max-w-[84px] rounded-b-md rounded-t-full border-2 border-b-0 border-ink"
+                  style={{ background: `linear-gradient(to top, ${it.color}, ${it.color}88)`, boxShadow: on ? `0 0 0 4px ${it.color}55` : 'none' }}
                   initial={{ height: '0%' }}
                   animate={{ height: `${h}%` }}
                   transition={{ delay: i * 0.05, type: 'spring', stiffness: 140, damping: 16 }}
@@ -67,11 +68,27 @@ export default function LeaderChart({ items, unit = 'cleanups' }) {
                     )}
                   </motion.div>
                 </motion.div>
-              </div>
-              <div className={`mt-3 w-full rounded-xl px-0.5 py-1 text-center transition ${on ? 'bg-ink text-white' : ''}`}>
-                <div className="line-clamp-3 break-words text-[11px] font-extrabold leading-tight sm:text-sm">{it.label}</div>
-                <div className={`text-[11px] font-bold ${on ? 'text-white/70' : 'text-ink/50'}`}>{it.value}</div>
-              </div>
+              </button>
+            )
+          })}
+        </div>
+        <div className="h-3 rounded-full border-2 border-ink bg-ink/10" style={{ boxShadow: '0 3px 0 #17324d' }} />
+      </div>
+
+      <div className="mt-3 flex items-start justify-around gap-0.5 sm:gap-4">
+        {items.map((it) => {
+          const on = it.key === sel?.key
+          return (
+            <button
+              type="button"
+              key={it.key}
+              onClick={() => setPicked(it.key)}
+              tabIndex={-1}
+              aria-hidden="true"
+              className={`min-w-0 max-w-[120px] flex-1 rounded-xl px-0 py-1 text-center transition ${on ? 'bg-ink text-white' : ''}`}
+            >
+              <div className="line-clamp-3 hyphens-auto break-words text-[10.5px] font-extrabold leading-tight sm:text-sm"><span className="sm:hidden">{it.short || it.label}</span><span className="hidden sm:inline">{it.label}</span></div>
+              <div className={`text-[11px] font-bold ${on ? 'text-white/70' : 'text-ink/50'}`}>{it.value}</div>
             </button>
           )
         })}
