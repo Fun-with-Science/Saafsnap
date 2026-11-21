@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Crosshair, MapPin, RefreshCw, Send, Sparkles, AlertTriangle, Share2, Camera, FileText, Clock, Package, Trees, Eye, Mail } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { analyzeReport } from '../lib/ai'
-import { fileToDataUrl, readExif, getPosition } from '../lib/image'
+import { fileToDataUrl, readExif } from '../lib/image'
 import { DEPARTMENTS } from '../lib/departments'
 import { distanceMeters, priority } from '../lib/priority'
 import PhotoPicker from '../components/PhotoPicker'
@@ -17,13 +17,14 @@ const SCAN_STEPS = ['Looking at the photo', 'Identifying the waste', 'Estimating
 const ENV_LABEL = { road: 'Road / street', river: 'River / ghat', pond: 'Pond / lake', drain: 'Drain / canal', market: 'Market', park: 'Park', residential: 'Residential area', other: 'Other' }
 
 export default function NewReport() {
-  const { reports, createReport, confirmSeen } = useStore()
+  const { reports, createReport, confirmSeen, here, locPerm, refreshLocation } = useStore()
   const navigate = useNavigate()
   const [step, setStep] = useState('photo')
   const [photo, setPhoto] = useState(null)
   const [exif, setExif] = useState(null)
-  const [loc, setLoc] = useState(null)
-  const [locState, setLocState] = useState('locating')
+  const fresh = here && Date.now() - here.at < 5 * 60000
+  const [loc, setLoc] = useState(fresh ? { ...here, source: 'gps' } : null)
+  const [locState, setLocState] = useState(fresh ? 'ok' : 'locating')
   const [landmark, setLandmark] = useState('')
   const [ai, setAi] = useState(null)
   const [error, setError] = useState('')
@@ -31,12 +32,12 @@ export default function NewReport() {
   const [ignoreDup, setIgnoreDup] = useState(false)
 
   const locate = async () => {
-    setLocState('locating')
-    const p = await getPosition()
+    setLocState((s) => (s === 'ok' ? s : 'locating'))
+    const p = await refreshLocation()
     if (p) {
-      setLoc({ ...p, source: 'gps' })
+      setLoc((prev) => (prev?.source === 'manual' ? prev : { ...p, source: 'gps' }))
       setLocState('ok')
-    } else setLocState('failed')
+    } else setLocState((s) => (s === 'ok' ? s : 'failed'))
   }
   useEffect(() => {
     locate()
@@ -149,7 +150,10 @@ export default function NewReport() {
               <p className="mt-1 text-sm font-semibold text-ink/55">
                 {locState === 'locating' && 'Finding where you are…'}
                 {locState === 'ok' && loc && `${loc.source === 'gps' ? 'Your GPS location' : loc.source === 'photo' ? 'Location from the photo' : 'Pinned on the map'} · drag the pin or tap the map to adjust.`}
-                {locState === 'failed' && !loc && "Couldn't get your location. Tap on the map to drop a pin where the garbage is."}
+                {locState === 'failed' && !loc &&
+                  (locPerm === 'denied'
+                    ? 'Location is blocked in your browser. Allow it from the lock icon next to the address, or tap the map to drop a pin.'
+                    : "Couldn't get your location. Tap on the map to drop a pin where the garbage is.")}
               </p>
               <PickMap value={loc} onChange={(v) => { setLoc(v); setLocState('ok') }} className="mt-3 h-56 overflow-hidden rounded-2xl border-2 border-ink" />
               <input className="input mt-3" placeholder="Landmark (optional), e.g. Behind Sealdah station gate 2" value={landmark} onChange={(e) => setLandmark(e.target.value)} />

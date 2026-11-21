@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Home, Map, Camera, Trophy, User, Briefcase, ShieldCheck, LogOut, Clock } from 'lucide-react'
 import { useStore, pointsFor } from '../lib/store'
 import Logo from './Logo'
+import LocationPrompt from './LocationPrompt'
 import { UserAvatar } from './Stickers'
 import { AI_MODE } from '../lib/ai'
 
@@ -115,6 +116,8 @@ export default function AppShell() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <LocationPrompt />
 
       {/* Mobile bottom nav */}
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink/10 bg-white/95 px-2 pt-1.5 backdrop-blur md:hidden">

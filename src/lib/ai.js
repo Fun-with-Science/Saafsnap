@@ -112,12 +112,16 @@ function normalize(raw, location, source) {
 export async function analyzeReport(dataUrl, { location, landmark } = {}) {
   if (KEY) {
     try {
-      const prompt = `You are SaafSnap, a civic waste inspector for Indian cities. A citizen photographed this spot${landmark ? ` ("${landmark}")` : ''}.
+      const where = location
+        ? `GPS ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}${location.accuracy ? ` (accurate to about ${Math.round(location.accuracy)} m)` : ''}, ${location.source === 'manual' ? 'pinned on a map by the citizen' : 'from the citizen\'s phone'}`
+        : 'location unknown'
+      const prompt = `You are SaafSnap, a civic waste inspector for Indian cities. A citizen photographed this spot${landmark ? ` ("${landmark}")` : ''}. Location: ${where}.
+Use the location as context: if you recognise the area (for example a riverbank, ghat, canal, market or main road), let it inform the department, severity and urgency, and name the area in the summary and complaint. Do not invent a street address you are not sure of.
 Decide if it shows real litter, dumped waste, sewage or a polluted water body. If not (selfie, food, clean street, screenshot), set is_garbage_scene=false.
 Pick the ONE department responsible:
 ${DEPT_LIST.map((d) => `- ${d.id}: ${d.name} — ${d.covers}`).join('\n')}
 Hazardous or medical items outrank general waste. Water bodies go to "water" unless it is a street drain ("drainage").
-Write complaint_text addressed to the officer of the department you picked (ward ${wardFor(location)}) in under 90 words: mention the landmark if known and the risks, and ask for cleanup within urgency_hours.`
+Write complaint_text addressed to the officer of the department you picked (ward ${wardFor(location)}) in under 90 words: mention the landmark or area, include the GPS coordinates so the crew can find the spot, state the risks, and ask for cleanup within urgency_hours.`
       const raw = await callGemini([{ text: prompt }, await imagePart(dataUrl)], ANALYSIS_SCHEMA)
       return normalize(raw, location, 'gemini')
     } catch (err) {
@@ -180,7 +184,8 @@ async function demoAnalyze(dataUrl, location, landmark) {
   const waste = Array.from({ length: Math.min(n, pool.length) }, (_, i) => pool[(s.hash + i) % pool.length])
   const ward = wardFor(location)
   const urgency = severity >= 8 ? 24 : severity >= 5 ? 48 : 72
-  const place = landmark || 'the reported location'
+  const gps = location ? ` (GPS ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''
+  const place = (landmark || 'the reported location') + gps
   const raw = {
     is_garbage_scene: s.edges > 0.025,
     title: TITLE_BY_CAT[cat],

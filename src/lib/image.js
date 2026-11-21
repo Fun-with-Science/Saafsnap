@@ -57,6 +57,17 @@ export async function readExif(file) {
   }
 }
 
+// 'granted' | 'prompt' | 'denied' | 'unsupported'. Browsers without the Permissions API report 'prompt'.
+export async function locationPermission() {
+  if (!navigator.geolocation) return 'unsupported'
+  try {
+    const p = await navigator.permissions?.query({ name: 'geolocation' })
+    return p?.state || 'prompt'
+  } catch {
+    return 'prompt'
+  }
+}
+
 export function getPosition(timeout = 9000) {
   return new Promise((resolve) => {
     if (!navigator.geolocation) return resolve(null)

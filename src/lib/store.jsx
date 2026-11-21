@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { backend } from './backend'
 import { earnedBadgeIds, BADGE_MAP } from './badges'
+import { getPosition, locationPermission } from './image'
 
 const Ctx = createContext(null)
 export const DATA_MODE = backend.mode
@@ -68,6 +69,28 @@ export function StoreProvider({ children }) {
     }
   }, [apply, refresh, showError])
 
+  const [here, setHere] = useState(null)
+  const [locPerm, setLocPerm] = useState('unknown')
+
+  const refreshLocation = useCallback(async () => {
+    const p = await getPosition()
+    if (p) {
+      setHere({ ...p, at: Date.now() })
+      setLocPerm('granted')
+    } else {
+      setLocPerm(await locationPermission())
+    }
+    return p
+  }, [])
+
+  useEffect(() => {
+    if (!sessionId) return
+    locationPermission().then((s) => {
+      setLocPerm(s)
+      if (s === 'granted') refreshLocation()
+    })
+  }, [sessionId, refreshLocation])
+
   const me = useMemo(() => users.find((u) => u.id === sessionId) || null, [users, sessionId])
   const meRef = useRef(me)
   meRef.current = me
@@ -120,6 +143,12 @@ export function StoreProvider({ children }) {
   const logout = useCallback(async () => {
     await backend.logout()
     setSessionId(null)
+    setHere(null)
+    try {
+      sessionStorage.removeItem('saafsnap.locationAsked')
+    } catch {
+      /* storage blocked */
+    }
   }, [])
 
   const value = {
@@ -130,6 +159,9 @@ export function StoreProvider({ children }) {
     celebration,
     toast,
     dataMode: backend.mode,
+    here,
+    locPerm,
+    refreshLocation,
     clearCelebration: () => setCelebration(null),
     userById: (id) => users.find((u) => u.id === id) || null,
     signup,
