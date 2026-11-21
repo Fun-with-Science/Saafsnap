@@ -11,6 +11,8 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists avatar text;
+
 -- Emails live apart from profiles so only the owner and admins can read them.
 create table if not exists public.contacts (
   id uuid primary key references public.profiles on delete cascade,
@@ -53,6 +55,9 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.profiles add constraint profiles_name_len check (char_length(name) <= 80) not valid;
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.profiles add constraint profiles_avatar check (avatar is null or avatar ~ ('^https://[a-z0-9]+\.supabase\.co/storage/v1/object/public/photos/' || id::text || '/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp)$'));
 exception when duplicate_object then null; end $$;
 -- Reports must have the fields the app needs, so one bad row can't break the feed.
 do $$ begin
@@ -203,6 +208,19 @@ begin
   end if;
   return ok;
 end $$;
+
+-- NGOs, groups and government accounts can set a logo uploaded to their own photo folder.
+create or replace function public.set_avatar(url text) returns void
+language plpgsql security definer set search_path = public as $$
+declare p profiles;
+begin
+  select * into p from profiles where id = auth.uid();
+  if p is null or p.role not in ('ngo', 'govt', 'group') then raise exception 'Only NGOs, groups and government accounts can set a logo'; end if;
+  if url is not null and not is_own_photo(url) then raise exception 'Upload the logo through SaafSnap'; end if;
+  update profiles set avatar = url where id = auth.uid();
+end $$;
+revoke execute on function public.set_avatar(text) from public, anon;
+grant execute on function public.set_avatar(text) to authenticated;
 
 revoke execute on function public.back_report(uuid), public.toggle_like(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) from public, anon;
 grant execute on function public.back_report(uuid), public.toggle_like(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) to authenticated;

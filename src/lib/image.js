@@ -28,6 +28,27 @@ export async function fileToDataUrl(file, maxDim = 960, quality = 0.72) {
   }
 }
 
+// Centre-crops an image to a small square JPEG for profile logos.
+export async function fileToLogo(file, size = 256) {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = await loadImage(url)
+    const w = img.naturalWidth || img.width
+    const h = img.naturalHeight || img.height
+    const side = Math.min(w, h)
+    const c = document.createElement('canvas')
+    c.width = size
+    c.height = size
+    const ctx = c.getContext('2d')
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(0, 0, size, size)
+    ctx.drawImage(img, (w - side) / 2, (h - side) / 2, side, side, 0, 0, size, size)
+    return c.toDataURL('image/jpeg', 0.85)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
 function drawToJpeg(img, maxDim, quality) {
   const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height))
   const w = Math.round((img.naturalWidth || img.width) * scale)

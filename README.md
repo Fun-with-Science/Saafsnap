@@ -47,7 +47,7 @@ SaafSnap turns a messy, real-world input (a phone photo and a location) into a s
 - **Before / after slider** on every cleaned report
 - **Animated leaderboard:** who cleans most (government vs NGOs vs citizens), a per-department government report card, and top people
 - **Badges and points** with celebration animations
-- **Login:** email or **Continue with Google**; asks for location right after login
+- **Login:** email and password; asks for location right after login
 - **Roles:** Citizen (instant), NGO / Government / Group (verified by an admin)
 - **Government desk:** an officer's own department inbox, overdue alerts and "start work"
 - **Admin panel:** approve or reject organisations, moderate reports, load demo data
@@ -114,20 +114,10 @@ The sidebar shows which AI and data mode is active.
 2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage and realtime, and is safe to run again.
 3. Turn off **Authentication → Sign In / Providers → Email → Confirm email** if you want new users to log in without clicking an email link.
 4. Put the project URL and publishable (anon) key in `.env` and restart `npm run dev`.
-5. Sign up in the app with your own account, then run [`supabase/make-admin.sql`](supabase/make-admin.sql) with your email to become the admin.
+5. Create the admin login: set an email and a 12+ character password in [`supabase/create-admin.sql`](supabase/create-admin.sql) and run it. (Or sign up normally and run [`supabase/make-admin.sql`](supabase/make-admin.sql) with your email.)
 6. Optional, for demos: run [`supabase/showcase-data.sql`](supabase/showcase-data.sql) to add 4 citizens, 2 NGOs and 8 reports. Remove them later with [`supabase/remove-demo-data.sql`](supabase/remove-demo-data.sql).
 
-Projects created with an older `setup.sql` should also run [`grants.sql`](supabase/grants.sql), [`likes.sql`](supabase/likes.sql) and [`hardening.sql`](supabase/hardening.sql) once.
-
-### Continue with Google
-
-1. In [Google Cloud Console](https://console.cloud.google.com/), set up the **OAuth consent screen** (Google Auth Platform → Branding / Audience), then create an **OAuth client ID** of type **Web application**.
-2. Add **Authorised JavaScript origins**: `http://localhost:5173` and your live site, for example `https://saafsnap.vercel.app`.
-3. Add **Authorised redirect URI**: `https://<your-project-ref>.supabase.co/auth/v1/callback`.
-4. In Supabase, go to **Authentication → Sign In / Providers → Google**, turn it on and paste the Client ID and Client Secret.
-5. In Supabase, go to **Authentication → URL Configuration**, set **Site URL** to your live site and add `http://localhost:5173/**` and `https://<your-site>/**` to **Redirect URLs**.
-
-The Client Secret only goes into Supabase. It never goes in `.env` or the app code.
+Projects created with an older `setup.sql` should also run [`grants.sql`](supabase/grants.sql), [`likes.sql`](supabase/likes.sql), [`hardening.sql`](supabase/hardening.sql) and [`avatars.sql`](supabase/avatars.sql) once.
 
 ## Offline demo mode
 

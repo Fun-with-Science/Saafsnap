@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ChevronRight, History, MapPin, Mail, UserRound, ShieldCheck, LogOut, Briefcase } from 'lucide-react'
+import { ArrowLeft, ChevronRight, History, MapPin, Mail, UserRound, ShieldCheck, LogOut, Briefcase, ImagePlus, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { IconBox, Spinner } from '../components/ui'
+import { UserAvatar } from '../components/Stickers'
+import { fileToLogo } from '../lib/image'
 import { ROLE } from './Profile'
 
 const LOC_TEXT = { granted: 'On', prompt: 'Off', denied: 'Blocked in browser', unsupported: 'Not supported', unknown: 'Checking…' }
@@ -26,9 +28,36 @@ function Row({ icon, color, title, detail, to, onClick, right, danger }) {
 }
 
 export default function Settings() {
-  const { me, logout, locPerm, refreshLocation } = useStore()
+  const { me, logout, locPerm, refreshLocation, setAvatar } = useStore()
   const navigate = useNavigate()
   const [locating, setLocating] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const canLogo = me.role === 'ngo' || me.role === 'govt' || me.role === 'group'
+
+  const pickLogo = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setSaving(true)
+    try {
+      await setAvatar(await fileToLogo(file))
+    } catch {
+      /* the store already shows the error */
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const removeLogo = async () => {
+    setSaving(true)
+    try {
+      await setAvatar(null)
+    } catch {
+      /* shown by the store */
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const turnOnLocation = async () => {
     setLocating(true)
@@ -46,6 +75,37 @@ export default function Settings() {
       </div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+        {canLogo && (
+          <section>
+            <h2 className="mb-2 px-1 text-xs font-extrabold uppercase tracking-wider text-ink/45">Logo</h2>
+            <div className="card flex flex-wrap items-center gap-4 p-4">
+              <div className="relative">
+                <UserAvatar user={me} size={72} />
+                {saving && (
+                  <div className="absolute inset-0 grid place-items-center rounded-full bg-white/70">
+                    <Spinner size={22} />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-extrabold">{me.avatar ? 'Your logo' : 'Add your logo'}</div>
+                <div className="text-sm font-semibold text-ink/50">Shown on your profile, cleaned spots and the leaderboard.</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <label className={`btn btn-primary btn-sm cursor-pointer ${saving ? 'pointer-events-none opacity-60' : ''}`}>
+                    <ImagePlus size={16} /> {me.avatar ? 'Change' : 'Upload'}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pickLogo} disabled={saving} />
+                  </label>
+                  {me.avatar && (
+                    <button type="button" className="btn btn-white btn-sm" onClick={removeLogo} disabled={saving}>
+                      <Trash2 size={16} /> Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         <section>
           <h2 className="mb-2 px-1 text-xs font-extrabold uppercase tracking-wider text-ink/45">Your activity</h2>
           <div className="card divide-y-2 divide-ink/5 overflow-hidden">
@@ -81,7 +141,7 @@ export default function Settings() {
           <div className="card divide-y-2 divide-ink/5 overflow-hidden">
             <Row icon={UserRound} color="leaf" title={me.org?.name || me.name} detail={`${ROLE[me.role]}${me.role !== 'citizen' && me.role !== 'admin' ? ` · ${me.status === 'active' ? 'Verified' : 'Verification pending'}` : ''}`} />
             {me.email && <Row icon={Mail} color="sky" title="Email" detail={me.email} />}
-            <Row icon={LogOut} color="coral" title="Log out" danger onClick={async () => { await logout(); navigate('/') }} />
+            <Row icon={LogOut} color="coral" title="Log out" danger onClick={() => { navigate('/', { replace: true }); logout() }} />
           </div>
         </section>
       </motion.div>

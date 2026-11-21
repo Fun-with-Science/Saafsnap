@@ -6,7 +6,6 @@ import Logo from '../components/Logo'
 import { useStore } from '../lib/store'
 import { pageMotion, Spinner, IconBox } from '../components/ui'
 import { DEMO_PASSWORD, ADMIN_PASSWORD } from '../lib/seed'
-import GoogleButton from '../components/GoogleButton'
 
 const DEMO = [
   { email: 'citizen@saafsnap.demo', password: DEMO_PASSWORD, label: 'Citizen', icon: User, color: 'leaf', tone: 'bg-leaf-50' },
@@ -53,10 +52,7 @@ export default function Login() {
         <div className="card p-6 sm:p-8">
           <h1 className="text-3xl font-extrabold">Welcome back</h1>
           <p className="mt-1 font-semibold text-ink/55">Log in to report and track spots.</p>
-          <div className="mt-6">
-            <GoogleButton />
-          </div>
-          <form onSubmit={submit} className="space-y-4">
+          <form onSubmit={submit} className="mt-6 space-y-4">
             <div>
               <label className="label" htmlFor="email">Email</label>
               <input id="email" className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />

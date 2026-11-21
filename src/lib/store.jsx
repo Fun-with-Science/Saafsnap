@@ -167,7 +167,6 @@ export function StoreProvider({ children }) {
     userById: (id) => users.find((u) => u.id === id) || null,
     signup,
     login,
-    loginWithGoogle: backend.loginWithGoogle,
     logout,
     createReport: (input) => act((u) => backend.createReport(u, input)),
     confirmSeen: (id) => act((u) => backend.back(u, id)).catch(() => {}),
@@ -195,6 +194,7 @@ export function StoreProvider({ children }) {
         (ok) => (ok ? { cleaned: r?.ai?.title || 'this spot', points: 50 + (r?.ai?.severity || 0) * 5 } : null),
       )
     },
+    setAvatar: (dataUrl) => act((u) => backend.setAvatar(u, dataUrl)),
     setUserStatus: (id, status) => act(() => backend.setUserStatus(id, status)).catch(() => {}),
     removeReport: (id) => act(() => backend.removeReport(id)).catch(() => {}),
     resetDemo: async () => {

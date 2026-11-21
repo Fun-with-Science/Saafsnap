@@ -24,7 +24,7 @@ export default function Profile() {
     <div className="mx-auto max-w-3xl space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card relative overflow-hidden p-6">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-leaf-100" />
-        <Link to="/settings" className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-2xl border-2 border-ink bg-white shadow-popsm transition hover:bg-leaf-50 active:translate-y-[2px] active:shadow-none" aria-label="Settings">
+        <Link to="/settings" className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-2xl border-2 border-ink bg-white shadow-popsm transition hover:bg-leaf-50 active:translate-y-[2px] active:shadow-none" aria-label="Settings">
           <Settings size={22} />
         </Link>
         <div className="relative flex flex-wrap items-center gap-4 pr-12">

@@ -3,3 +3,7 @@ dist
 .env
 .env.local
 .claude/
+
+# Local copies with real passwords
+*.local.sql
+.env.*

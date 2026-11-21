@@ -50,7 +50,6 @@ export default function App() {
   return (
     <>
       <Suspense fallback={<PageLoader />}>
-      <AnimatePresence mode="wait">
         <Routes location={location} key={routeKey}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -69,7 +68,6 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AnimatePresence>
       </Suspense>
       <Celebration />
       <AnimatePresence>

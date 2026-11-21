@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Home, Map, Camera, Trophy, User, Briefcase, ShieldCheck, LogOut, Clock } from 'lucide-react'
 import { useStore, pointsFor } from '../lib/store'
 import Logo from './Logo'
@@ -70,7 +70,7 @@ export default function AppShell() {
               {ROLE_LABEL[me.role]} · {pointsFor(me.id, reports)} pts
             </div>
           </div>
-          <button onClick={() => { logout(); navigate('/') }} className="grid h-9 w-9 place-items-center rounded-xl hover:bg-ink/5" title="Log out" aria-label="Log out">
+          <button onClick={() => { navigate('/', { replace: true }); logout() }} className="grid h-9 w-9 place-items-center rounded-xl hover:bg-ink/5" title="Log out" aria-label="Log out">
             <LogOut size={18} />
           </button>
         </div>
@@ -108,20 +108,18 @@ export default function AppShell() {
       )}
 
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
-            exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }}
-          >
+        {/* Enter-only animation: waiting for an exit animation could leave a blank page. */}
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+        >
             <ErrorBoundary key={location.pathname}>
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
             </ErrorBoundary>
-          </motion.div>
-        </AnimatePresence>
+        </motion.div>
       </main>
 
       <LocationPrompt />

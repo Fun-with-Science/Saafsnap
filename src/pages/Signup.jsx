@@ -7,7 +7,6 @@ import { useStore } from '../lib/store'
 import { DEPT_LIST } from '../lib/departments'
 import { ORG_COLORS, ORG_ICON_KEYS, OrgLogo } from '../components/Stickers'
 import { pageMotion, Spinner, IconBox } from '../components/ui'
-import GoogleButton from '../components/GoogleButton'
 
 const ROLES = [
   { id: 'citizen', icon: User, color: 'leaf', title: 'Citizen', text: 'Report spots, back others, clean up and earn badges.', tone: 'bg-leaf-100', verify: false },
@@ -17,7 +16,7 @@ const ROLES = [
 ]
 
 export default function Signup() {
-  const { signup, dataMode } = useStore()
+  const { signup } = useStore()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [role, setRole] = useState(null)
@@ -105,10 +104,6 @@ export default function Signup() {
           <AnimatePresence mode="wait">
             {step === 0 ? (
               <motion.div key="role" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <div className="mb-1">
-                  <GoogleButton label="Sign up with Google" />
-                  {dataMode === 'supabase' && <p className="-mt-3 mb-4 text-center text-xs font-bold text-ink/45">Google sign-up creates a Citizen account. NGOs and government staff, use the form below.</p>}
-                </div>
                 <h1 className="text-3xl font-extrabold">Who are you?</h1>
                 <p className="mt-1 font-semibold text-ink/55">Pick one. You can't change this later.</p>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -158,7 +153,7 @@ export default function Signup() {
                       <span className="label">Pick your logo</span>
                       <div className="flex flex-wrap items-center gap-3">
                         <OrgLogo org={{ color: form.color, icon: form.icon, name: form.orgName }} size={56} />
-                        <div className="flex flex-1 flex-col gap-2">
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
                           <div className="flex flex-wrap gap-1.5">
                             {ORG_COLORS.map((c) => (
                               <button type="button" key={c} onClick={() => setForm({ ...form, color: c })} aria-label={`Colour ${c}`}
@@ -189,7 +184,7 @@ export default function Signup() {
                   </div>
                 )}
                 {r.verify && (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
                     <div>
                       <label className="label" htmlFor="reg">{role === 'govt' ? 'Employee ID' : 'Registration no.'}</label>
                       <input id="reg" className="input" required maxLength={40} value={form.regId} onChange={upd('regId')} placeholder={role === 'govt' ? 'EMP-1234' : 'NGO/WB/2024/0001'} />
@@ -198,8 +193,8 @@ export default function Signup() {
                       <label className="label" htmlFor="city">City</label>
                       <input id="city" className="input" required maxLength={40} value={form.city} onChange={upd('city')} />
                     </div>
-                    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-ink/25 px-4 py-3 font-bold text-ink/60 hover:border-ink/50 sm:col-span-2">
-                      <Upload size={18} />
+                    <label className="flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-ink/25 px-4 py-3 font-bold text-ink/60 hover:border-ink/50 sm:col-span-2">
+                      <Upload size={18} className="shrink-0" />
                       <span className="truncate">{form.proof || 'Attach ID / registration proof (optional)'}</span>
                       <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setForm({ ...form, proof: e.target.files?.[0]?.name || '' })} />
                     </label>

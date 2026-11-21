@@ -20,6 +20,7 @@ const toUser = (p, emails) => ({
   role: p.role,
   status: p.status,
   org: p.org,
+  avatar: typeof p.avatar === 'string' && p.avatar.startsWith(`${SB_URL}/storage/v1/object/public/photos/`) ? p.avatar : null,
   createdAt: Date.parse(p.created_at),
   email: emails[p.id] || null,
 })
@@ -109,11 +110,6 @@ export const supabaseBackend = {
     return data.user.id
   },
 
-  // Redirects to Google; the session is picked up from the URL when the app reloads.
-  async loginWithGoogle() {
-    must(await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/feed` } }))
-  },
-
   async logout() {
     await sb.auth.signOut()
   },
@@ -138,6 +134,12 @@ export const supabaseBackend = {
   async submitCleanup(me, id, { photo, verification }) {
     const url = await uploadPhoto(photo, me.id)
     return must(await sb.rpc('submit_cleanup', { rid: id, photo_url: url, verification }))
+  },
+
+  // NGOs, groups and government accounts can show their own logo.
+  async setAvatar(me, dataUrl) {
+    const url = dataUrl ? await uploadPhoto(dataUrl, me.id) : null
+    must(await sb.rpc('set_avatar', { url }))
   },
 
   async setUserStatus(userId, status) {

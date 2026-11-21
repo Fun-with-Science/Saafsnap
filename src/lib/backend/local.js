@@ -117,6 +117,11 @@ export const localBackend = {
     return data.verification.verified
   },
 
+  async setAvatar(me, dataUrl) {
+    users = users.map((u) => (u.id === me.id ? { ...u, avatar: dataUrl || null } : u))
+    save()
+  },
+
   async setUserStatus(userId, status) {
     users = users.map((u) => (u.id === userId ? { ...u, status } : u))
     save()

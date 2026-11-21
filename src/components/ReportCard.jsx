@@ -12,7 +12,7 @@ export function CleanedRibbon({ cleaner, className = '' }) {
   if (!cleaner) return null
   return (
     <div className={`flex items-center gap-2 rounded-full border-2 border-ink bg-white py-1 pl-1 pr-3 text-sm font-extrabold shadow-popsm ${className}`}>
-      {cleaner.role === 'ngo' || cleaner.role === 'group' ? <OrgLogo org={cleaner.org} size={26} /> : <UserAvatar user={cleaner} size={26} />}
+      {cleaner.role === 'ngo' || cleaner.role === 'group' ? <OrgLogo org={cleaner.org} src={cleaner.avatar} size={26} /> : <UserAvatar user={cleaner} size={26} />}
       <span className="truncate">Cleaned by {cleaner.org?.name || cleaner.name}</span>
     </div>
   )

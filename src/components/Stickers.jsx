@@ -39,17 +39,21 @@ export function GovtMascot({ mood = 'sleepy', size = 80, fill = false }) {
   )
 }
 
-export function OrgLogo({ org, size = 48, animate = false }) {
+export function OrgLogo({ org, size = 48, animate = false, src }) {
   const Icon = ICONS[org?.icon] || Leaf
   const color = org?.color || '#10b981'
   return (
     <motion.div
-      className="grid shrink-0 place-items-center rounded-full border-2 border-ink"
-      style={{ width: size, height: size, background: color, boxShadow: '0 3px 0 #17324d' }}
+      className="grid shrink-0 place-items-center overflow-hidden rounded-full border-2 border-ink bg-white"
+      style={{ width: size, height: size, background: src ? '#fff' : color, boxShadow: '0 3px 0 #17324d' }}
       animate={animate ? { rotate: [0, -8, 8, 0], scale: [1, 1.06, 1] } : undefined}
       transition={animate ? { duration: 2.2, repeat: Infinity, repeatDelay: 1 } : undefined}
     >
-      <Icon color="#fff" strokeWidth={2.6} size={size * 0.5} />
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+      ) : (
+        <Icon color="#fff" strokeWidth={2.6} size={size * 0.5} />
+      )}
     </motion.div>
   )
 }
@@ -84,6 +88,7 @@ const AVATAR_TONES = ['#10b981', '#0ea5e9', '#f59e0b', '#8b5cf6', '#f43f5e', '#1
 
 export function UserAvatar({ user, size = 40 }) {
   if (!user) return <div className="rounded-full bg-ink/10" style={{ width: size, height: size }} />
+  if (user.avatar && user.role !== 'citizen' && user.role !== 'admin') return <OrgLogo org={user.org} src={user.avatar} size={size} />
   if (user.role === 'ngo' || user.role === 'group') return <OrgLogo org={user.org} size={size} />
   if (user.role === 'govt')
     return (

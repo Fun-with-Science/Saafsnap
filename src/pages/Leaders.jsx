@@ -31,14 +31,14 @@ export default function Leaders() {
     const list = [
       { key: 'govt', label: 'Government', value: govt, color: '#3b82f6', kind: 'govt' },
       { key: 'citizens', label: 'Citizens', value: citizens, color: '#10b981', kind: 'citizen' },
-      ...orgs.map((o) => ({ key: o.u.id, label: o.u.org.name, value: o.n, color: o.u.org.color, org: o.u.org })),
+      ...orgs.map((o) => ({ key: o.u.id, label: o.u.org.name, value: o.n, color: o.u.org.color, org: o.u.org, avatar: o.u.avatar })),
     ].sort((a, b) => b.value - a.value)
     const top = list.slice(0, 6)
     const govtLeads = top[0]?.key === 'govt'
     return top.map((it) => ({
       ...it,
       sticker:
-        it.kind === 'govt' ? <GovtMascot mood={govtLeads ? 'happy' : 'sleepy'} fill /> : it.kind === 'citizen' ? <CitizenHero size={54} /> : <OrgLogo org={it.org} size={46} animate />,
+        it.kind === 'govt' ? <GovtMascot mood={govtLeads ? 'happy' : 'sleepy'} fill /> : it.kind === 'citizen' ? <CitizenHero size={54} /> : <OrgLogo org={it.org} src={it.avatar} size={46} animate />,
     }))
   }, [reports, users])
 
