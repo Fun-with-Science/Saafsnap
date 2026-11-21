@@ -3,8 +3,9 @@ import { imageStats, histSimilarity, toJpegDataUrl } from './image'
 import { distanceMeters } from './priority'
 
 const KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
-const MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash'
-const MODELS = [...new Set([MODEL, 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'])]
+const MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash-lite'
+// Flash-lite answers in seconds; the bigger models are often overloaded, so they are only backups.
+const MODELS = [...new Set([MODEL, 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'])]
 export const AI_MODE = KEY ? 'gemini' : 'demo'
 
 const CATEGORIES = Object.keys(DEPARTMENTS)
@@ -18,7 +19,7 @@ async function imagePart(dataUrl) {
 
 async function callModel(model, parts, schema) {
   const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), 30000)
+  const timer = setTimeout(() => ctrl.abort(), 15000)
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',

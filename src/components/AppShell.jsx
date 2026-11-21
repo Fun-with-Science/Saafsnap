@@ -5,6 +5,7 @@ import { Home, Map, Camera, Trophy, User, Briefcase, ShieldCheck, LogOut, Clock 
 import { useStore, pointsFor } from '../lib/store'
 import Logo from './Logo'
 import LocationPrompt from './LocationPrompt'
+import ErrorBoundary from './ErrorBoundary'
 import { PageLoader } from './ui'
 import { UserAvatar } from './Stickers'
 import { AI_MODE } from '../lib/ai'
@@ -114,9 +115,11 @@ export default function AppShell() {
             animate={{ opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
             exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }}
           >
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
+            <ErrorBoundary key={location.pathname}>
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </main>

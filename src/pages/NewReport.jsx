@@ -156,7 +156,7 @@ export default function NewReport() {
                     : "Couldn't get your location. Tap on the map to drop a pin where the garbage is.")}
               </p>
               <PickMap value={loc} onChange={(v) => { setLoc(v); setLocState('ok') }} className="mt-3 h-56 overflow-hidden rounded-2xl border-2 border-ink" />
-              <input className="input mt-3" placeholder="Landmark (optional), e.g. Behind Sealdah station gate 2" value={landmark} onChange={(e) => setLandmark(e.target.value)} />
+              <input className="input mt-3" maxLength={120} placeholder="Landmark (optional), e.g. Behind Sealdah station gate 2" value={landmark} onChange={(e) => setLandmark(e.target.value)} />
             </div>
 
             {error && <div className="rounded-2xl bg-coral-100 px-4 py-3 font-bold text-coral-600">{error}</div>}

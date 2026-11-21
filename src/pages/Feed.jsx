@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Camera } from 'lucide-react'
 import { useStore } from '../lib/store'
 import ReportCard from '../components/ReportCard'
+import ErrorBoundary from '../components/ErrorBoundary'
 import { EmptyState } from '../components/ui'
 
 const lastActivity = (r) => r.cleanup?.at || r.createdAt
@@ -24,7 +25,9 @@ export default function Feed() {
       ) : (
         <div className="space-y-6">
           {list.map((r, i) => (
-            <ReportCard key={r.id} report={r} index={i} />
+            <ErrorBoundary key={r.id} small>
+              <ReportCard report={r} index={i} />
+            </ErrorBoundary>
           ))}
         </div>
       )}

@@ -59,7 +59,7 @@ SaafSnap turns a messy, real-world input (a phone photo and a location) into a s
 |---|---|
 | Frontend | React 18, Vite 5, React Router, Tailwind CSS, Framer Motion, Lucide icons |
 | Maps | Leaflet + OpenStreetMap |
-| AI | Gemini API with structured JSON output (`gemini-3.5-flash`, automatic fallback to other models) |
+| AI | Gemini API with structured JSON output (`gemini-3.5-flash-lite`, automatic fallback to other models) |
 | Backend | Supabase: Postgres, Auth, Storage, Realtime, row-level security |
 | Offline mode | IndexedDB, used automatically when Supabase isn't configured |
 
@@ -74,6 +74,16 @@ flowchart LR
     H[After photo] --> I[Gemini + EXIF + GPS checks]
     I -->|verified| J[Spot turns green, badge + credit]
 ```
+
+## Demo for judges (2 minutes)
+
+1. **Snap**: tap the camera, take or upload a garbage photo. Location is filled in automatically.
+2. **AI routing**: Gemini names the waste, severity and risks, picks the responsible department and ward officer, and drafts the complaint with GPS coordinates.
+3. **Feed**: posts lead with the place name. Double-tap an open spot for "I saw this too"; double-tap a cleaned spot to like the cleanup.
+4. **Map**: spots grow redder as more people report them, and critical spots pulse.
+5. **Cleanup proof**: on a report, tap "I cleaned it!" and upload an after photo. AI checks it's real, at the same place and actually clean.
+6. **Leaderboard**: NGOs vs government vs citizens. If the government is behind, the government sticker dozes off and the "Wake up, Government!" banner appears.
+7. **Admin**: Settings → Admin panel to approve NGO and government accounts.
 
 ## Getting started
 
@@ -92,7 +102,7 @@ Open http://localhost:5173.
 | Variable | Where to get it | Required |
 |---|---|---|
 | `VITE_GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/) → API keys | No: without it a built-in offline analyser is used |
-| `VITE_GEMINI_MODEL` | Defaults to `gemini-3.5-flash` | No |
+| `VITE_GEMINI_MODEL` | Defaults to `gemini-3.5-flash-lite` | No |
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | No: without it data stays in the browser |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API Keys (publishable key, `sb_publishable_...`) | No |
 
@@ -101,12 +111,13 @@ The sidebar shows which AI and data mode is active.
 ### Supabase setup
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage and realtime. It's safe to run again. If you ran an older copy of it, also run [`supabase/grants.sql`](supabase/grants.sql): new Supabase projects don't give the app access to new tables automatically.
+2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage and realtime, and is safe to run again.
 3. Turn off **Authentication → Sign In / Providers → Email → Confirm email** if you want new users to log in without clicking an email link.
 4. Put the project URL and publishable (anon) key in `.env` and restart `npm run dev`.
 5. Sign up in the app with your own account, then run [`supabase/make-admin.sql`](supabase/make-admin.sql) with your email to become the admin.
+6. Optional, for demos: run [`supabase/showcase-data.sql`](supabase/showcase-data.sql) to add 4 citizens, 2 NGOs and 8 reports. Remove them later with [`supabase/remove-demo-data.sql`](supabase/remove-demo-data.sql).
 
-Projects set up with an older `setup.sql` also contain demo accounts (`@saafsnap.demo`). After step 5, run [`supabase/remove-demo-data.sql`](supabase/remove-demo-data.sql) to delete them and their reports.
+Projects created with an older `setup.sql` should also run [`grants.sql`](supabase/grants.sql), [`likes.sql`](supabase/likes.sql) and [`hardening.sql`](supabase/hardening.sql) once.
 
 ### Continue with Google
 
@@ -147,17 +158,39 @@ src/
     reportOps.js    Report state changes (offline backend)
     backend/        supabase.js (shared) and local.js (offline)
     store.jsx       App state, actions, badge celebrations
-supabase/           setup.sql (schema + security), make-admin.sql, grants.sql, remove-demo-data.sql
+supabase/           setup.sql (schema + security), make-admin.sql, showcase-data.sql,
+                    remove-demo-data.sql, and upgrade scripts for older projects
+scripts/            security-check.mjs (automated attack tests against the live backend)
 public/stickers/    Government character stickers
 public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
 ```
 
-## Security notes
+## Security
 
-- Reports can only change through database functions (back a report, start work, submit cleanup). There are no direct updates.
-- Only admins can approve organisations or delete reports. Sign-ups can never make themselves admin.
+SaafSnap is a client-rendered single-page app (no server-side rendering), so all protection lives in the database and the browser.
+
+**Database (Supabase row-level security)**
+- Visitors who aren't logged in can't read anything.
+- Reports can only change through database functions (back a report, like, start work, submit cleanup). Direct edits and deletes are blocked; only admins can delete.
+- Nobody can make themselves admin. Organisations start as pending until an admin approves them.
 - Emails are visible only to their owner and admins.
-- The Gemini key is used from the browser, which is fine for a demo. For production, move the Gemini calls and cleanup verification into a Supabase Edge Function so the key stays secret and verification can't be faked.
+- New reports can't be created for someone else, pre-marked as cleaned, or given fake likes or crowd counts. Photos must be the uploader's own file in this project's storage.
+- Text length, location range, department and report structure are checked, so malformed data is rejected.
+
+**Storage**: users can upload only into their own folder, only JPEG/PNG/WebP, up to 5 MB.
+
+**Browser**
+- A strict Content Security Policy only allows our own scripts, and network calls only to Supabase, Gemini and the map tiles.
+- The site can't be embedded in other sites (clickjacking protection), plus the usual `nosniff`, referrer and HSTS headers.
+- All user text is rendered by React (auto-escaped); there is no raw HTML injection anywhere.
+- Every report loaded from the database is sanitised, and error boundaries keep one bad post from breaking the page.
+
+**Tested**: `npm run security-check` attacks the live backend with throwaway accounts (about 24 checks, including privilege escalation, fake reports, tampering and malicious uploads) and prints PASS/FAIL for each.
+
+**Known limits** (fine for a hackathon, next steps for production):
+- The Gemini key is used from the browser. Restrict it to your domain in Google Cloud, or move the calls into a Supabase Edge Function.
+- Cleanup verification runs in the browser, so a determined user could fake a "verified" result. Moving it into an Edge Function closes that gap.
+- `npm audit` lists advisories for the dev server (Vite/esbuild) and React Router's server-rendering and redirect features. Neither the dev server nor those features are part of the deployed site; upgrading to Vite 6+ / React Router 7 is planned.
 
 ## Credits
 

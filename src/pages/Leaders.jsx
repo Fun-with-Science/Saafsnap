@@ -38,7 +38,7 @@ export default function Leaders() {
     return top.map((it) => ({
       ...it,
       sticker:
-        it.kind === 'govt' ? <GovtMascot mood={govtLeads ? 'happy' : 'sleepy'} size={58} /> : it.kind === 'citizen' ? <CitizenHero size={54} /> : <OrgLogo org={it.org} size={46} animate />,
+        it.kind === 'govt' ? <GovtMascot mood={govtLeads ? 'happy' : 'sleepy'} fill /> : it.kind === 'citizen' ? <CitizenHero size={54} /> : <OrgLogo org={it.org} size={46} animate />,
     }))
   }, [reports, users])
 

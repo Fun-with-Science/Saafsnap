@@ -1,3 +1,13 @@
+// Decodes a data: URL locally (fetch() on data: URLs is blocked by the site's security policy).
+export function dataUrlToBlob(dataUrl) {
+  const [head, body] = dataUrl.split(',')
+  const mime = head.match(/data:([^;]+)/)?.[1] || 'image/jpeg'
+  const bin = atob(body)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return new Blob([bytes], { type: mime })
+}
+
 export function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image()

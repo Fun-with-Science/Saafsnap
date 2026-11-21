@@ -1,7 +1,8 @@
 // Shared, multi-device storage. Run supabase/setup.sql once before using it.
 import { createClient } from '@supabase/supabase-js'
 import { newId } from '../auth'
-import { newReport } from '../reportOps'
+import { newReport, sanitizeReport } from '../reportOps'
+import { dataUrlToBlob } from '../image'
 
 const SB_URL = import.meta.env.VITE_SUPABASE_URL
 const SB_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -23,7 +24,7 @@ const toUser = (p, emails) => ({
   email: emails[p.id] || null,
 })
 
-const toReport = (r) => ({
+const toReport = (r) => sanitizeReport({
   id: r.id,
   createdBy: r.created_by,
   createdAt: Date.parse(r.created_at),
@@ -62,7 +63,7 @@ const toRow = (r) => ({
 })
 
 async function uploadPhoto(dataUrl, uid) {
-  const blob = await (await fetch(dataUrl)).blob()
+  const blob = dataUrlToBlob(dataUrl)
   const path = `${uid}/${newId()}.jpg`
   must(await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' }))
   return sb.storage.from('photos').getPublicUrl(path).data.publicUrl

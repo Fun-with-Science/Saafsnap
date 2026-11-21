@@ -6,16 +6,17 @@ export const ORG_ICON_KEYS = Object.keys(ICONS)
 export const ORG_COLORS = ['#0ea5e9', '#8b5cf6', '#f59e0b', '#14b8a6', '#f43f5e', '#10b981', '#ec4899', '#6366f1']
 
 // Calm sticker = govt lagging behind (with "zzz"); pointing sticker = govt taking action.
-// Small sizes use the face crop so the face stays recognisable.
-export function GovtMascot({ mood = 'sleepy', size = 80 }) {
+// Small sizes use a round badge (whole head inside the circle); `fill` makes it fill its parent.
+export function GovtMascot({ mood = 'sleepy', size = 80, fill = false }) {
   const sleepy = mood === 'sleepy'
-  const face = size < 84
-  const src = `/stickers/govt-${sleepy ? 'calm' : 'pointing'}${face ? '-face' : ''}.webp`
+  const badge = fill || size < 84
+  const src = `/stickers/govt-${sleepy ? 'calm' : 'pointing'}${badge ? '-badge' : ''}.webp`
+  const z = fill ? 56 : size
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className={`relative shrink-0 ${fill ? 'h-full w-full' : ''}`} style={fill ? undefined : { width: size, height: size }}>
       <motion.div
-        className={`h-full w-full ${face ? 'overflow-hidden rounded-full' : ''}`}
-        style={{ originY: 0.9 }}
+        className="h-full w-full"
+        style={{ originY: badge ? 0.5 : 0.9 }}
         animate={sleepy ? { rotate: [-4, 4, -4] } : { y: [0, -4, 0], rotate: [0, -3, 3, 0] }}
         transition={{ duration: sleepy ? 3.2 : 1.3, repeat: Infinity, ease: 'easeInOut' }}
       >
@@ -26,9 +27,9 @@ export function GovtMascot({ mood = 'sleepy', size = 80 }) {
           <motion.span
             key={i}
             className="pointer-events-none absolute font-display font-extrabold text-sky2-600"
-            style={{ right: -size * 0.08, top: size * 0.05, fontSize: size * (0.16 + i * 0.05) }}
+            style={{ right: -z * 0.08, top: z * 0.05, fontSize: z * (0.16 + i * 0.05) }}
             initial={{ opacity: 0, x: 0, y: 0 }}
-            animate={{ opacity: [0, 1, 0], x: [0, size * 0.12], y: [0, -size * 0.35] }}
+            animate={{ opacity: [0, 1, 0], x: [0, z * 0.12], y: [0, -z * 0.35] }}
             transition={{ duration: 2.4, delay: i * 0.8, repeat: Infinity }}
           >
             z

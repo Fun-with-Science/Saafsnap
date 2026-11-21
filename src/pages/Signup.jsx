@@ -145,14 +145,14 @@ export default function Signup() {
                 {(role === 'citizen' || role === 'govt') && (
                   <div>
                     <label className="label" htmlFor="name">Your full name</label>
-                    <input id="name" className="input" required value={form.name} onChange={upd('name')} placeholder="e.g. Ananya Roy" />
+                    <input id="name" className="input" required maxLength={80} value={form.name} onChange={upd('name')} placeholder="e.g. Ananya Roy" />
                   </div>
                 )}
                 {(role === 'ngo' || role === 'group') && (
                   <>
                     <div>
                       <label className="label" htmlFor="org">{role === 'ngo' ? 'NGO name' : 'Group name'}</label>
-                      <input id="org" className="input" required value={form.orgName} onChange={upd('orgName')} placeholder={role === 'ngo' ? 'e.g. Green Ganga Collective' : 'e.g. Lake Town RWA'} />
+                      <input id="org" className="input" required maxLength={80} value={form.orgName} onChange={upd('orgName')} placeholder={role === 'ngo' ? 'e.g. Green Ganga Collective' : 'e.g. Lake Town RWA'} />
                     </div>
                     <div>
                       <span className="label">Pick your logo</span>
@@ -192,11 +192,11 @@ export default function Signup() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="label" htmlFor="reg">{role === 'govt' ? 'Employee ID' : 'Registration no.'}</label>
-                      <input id="reg" className="input" required value={form.regId} onChange={upd('regId')} placeholder={role === 'govt' ? 'EMP-1234' : 'NGO/WB/2024/0001'} />
+                      <input id="reg" className="input" required maxLength={40} value={form.regId} onChange={upd('regId')} placeholder={role === 'govt' ? 'EMP-1234' : 'NGO/WB/2024/0001'} />
                     </div>
                     <div>
                       <label className="label" htmlFor="city">City</label>
-                      <input id="city" className="input" required value={form.city} onChange={upd('city')} />
+                      <input id="city" className="input" required maxLength={40} value={form.city} onChange={upd('city')} />
                     </div>
                     <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-ink/25 px-4 py-3 font-bold text-ink/60 hover:border-ink/50 sm:col-span-2">
                       <Upload size={18} />

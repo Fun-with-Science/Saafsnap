@@ -53,7 +53,7 @@ export default function LeaderChart({ items, unit = 'cleanups' }) {
                 >
                   <span className="absolute inset-y-6 left-[18%] w-[14%] rounded-full bg-white/35" />
                   <motion.div
-                    className="absolute left-1/2 top-0 grid place-items-center rounded-full border-2 border-ink bg-white"
+                    className="absolute left-1/2 top-0 grid place-items-center rounded-full border-2 border-ink bg-white p-[3px]"
                     style={{ x: '-50%', y: '-50%', width: 'clamp(52px, 120%, 92px)', aspectRatio: '1', boxShadow: '0 4px 0 #17324d' }}
                     initial={{ scale: 0.6, rotate: -25 }}
                     animate={{ scale: on ? 1.08 : 1, rotate: 0 }}
