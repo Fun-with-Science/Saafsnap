@@ -14,9 +14,39 @@ One photo of garbage, a dirty river or a choked drain. Gemini works out what it 
 ![Gemini](https://img.shields.io/badge/Gemini-API-8E75B2?logo=googlegemini&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
 
+### [▶ Open the live app](https://saafsnap.vercel.app) · [Demo logins](#demo-logins) · [2-minute demo guide](#demo-for-judges-2-minutes)
+
 </div>
 
 ---
+
+## Try it live
+
+Best viewed on a phone (it works on desktop too).
+
+| Page | Link |
+|---|---|
+| Live app | https://saafsnap.vercel.app |
+| Log in | https://saafsnap.vercel.app/login |
+| Create an account | https://saafsnap.vercel.app/signup |
+| Feed | https://saafsnap.vercel.app/feed |
+| Pollution map | https://saafsnap.vercel.app/map |
+| Leaderboard | https://saafsnap.vercel.app/leaders |
+| Admin panel (admin login needed) | https://saafsnap.vercel.app/admin |
+| Source code | https://github.com/Fun-with-Science/Saafsnap |
+
+### Demo logins
+
+| Role | Email | Password | What to try |
+|---|---|---|---|
+| **Admin** | `adminsaaf@gmail.com` | `admin8721` | Opens straight into the Admin panel: approve or reject NGO / government accounts, moderate reports |
+| **NGO** | `greenganga@saafsnap.demo` | `ngo1234` | Green Ganga Collective: clean a reported spot, upload its logo in Settings, climb the leaderboard |
+| **NGO** | `streets@saafsnap.demo` | `ngo1234` | Clean Streets Kolkata |
+
+- **Citizens:** create your own account at [/signup](https://saafsnap.vercel.app/signup). It's instant.
+- **Government officer:** sign up as **Government** and pick a department, then log in as the admin and approve it in the Admin panel. That is the real verification flow.
+- The app asks for your location after login so the AI can tag where the photo was taken. You can say no and drop a pin on the map instead.
+- These are shared demo accounts. Please don't delete other people's reports.
 
 ## The problem
 
@@ -50,7 +80,8 @@ SaafSnap turns a messy, real-world input (a phone photo and a location) into a s
 - **Login:** email and password; asks for location right after login
 - **Roles:** Citizen (instant), NGO / Government / Group (verified by an admin)
 - **Government desk:** an officer's own department inbox, overdue alerts and "start work"
-- **Admin panel:** approve or reject organisations, moderate reports, load demo data
+- **Admin panel:** approve or reject organisations, moderate reports
+- **Organisation logos:** NGOs, groups and government accounts upload their own logo in Settings
 - **Mobile first:** bottom tab bar with a big camera button, tested down to 320 px wide
 
 ## Tech stack
@@ -83,7 +114,7 @@ flowchart LR
 4. **Map**: spots grow redder as more people report them, and critical spots pulse.
 5. **Cleanup proof**: on a report, tap "I cleaned it!" and upload an after photo. AI checks it's real, at the same place and actually clean.
 6. **Leaderboard**: NGOs vs government vs citizens. If the government is behind, the government sticker dozes off and the "Wake up, Government!" banner appears.
-7. **Admin**: Settings → Admin panel to approve NGO and government accounts.
+7. **Admin**: log in with the [admin account](#demo-logins). It opens the Admin panel, where NGO and government sign-ups wait for approval.
 
 ## Getting started
 
@@ -117,11 +148,11 @@ The sidebar shows which AI and data mode is active.
 5. Create the admin login: set an email and a 12+ character password in [`supabase/create-admin.sql`](supabase/create-admin.sql) and run it. (Or sign up normally and run [`supabase/make-admin.sql`](supabase/make-admin.sql) with your email.)
 6. Optional, for demos: run [`supabase/showcase-data.sql`](supabase/showcase-data.sql) to add 4 citizens, 2 NGOs and 8 reports. Remove them later with [`supabase/remove-demo-data.sql`](supabase/remove-demo-data.sql).
 
-Projects created with an older `setup.sql` should also run [`grants.sql`](supabase/grants.sql), [`likes.sql`](supabase/likes.sql), [`hardening.sql`](supabase/hardening.sql) and [`avatars.sql`](supabase/avatars.sql) once.
+Projects created with an older `setup.sql` should also run the scripts in [`supabase/upgrades/`](supabase/upgrades) once: `grants.sql`, `likes.sql`, `hardening.sql`, `avatars.sql`.
 
 ## Offline demo mode
 
-Without Supabase settings, the app runs entirely in the browser with 19 demo reports and these demo logins (one-tap buttons on the login page):
+When you run it locally without Supabase settings, the app works entirely in the browser with 19 demo reports and these logins (one-tap buttons on the login page):
 
 | Role | Email | Password |
 |---|---|---|
@@ -130,7 +161,7 @@ Without Supabase settings, the app runs entirely in the browser with 19 demo rep
 | NGO | `greenganga@saafsnap.demo` | `demo1234` |
 | Government (Solid Waste) | `swm@saafsnap.demo` | `demo1234` |
 
-These exist only in offline demo mode, not in the live Supabase app.
+These exist only in offline demo mode. For the live app, use the [demo logins](#demo-logins) above.
 
 ## Project structure
 
@@ -148,8 +179,9 @@ src/
     reportOps.js    Report state changes (offline backend)
     backend/        supabase.js (shared) and local.js (offline)
     store.jsx       App state, actions, badge celebrations
-supabase/           setup.sql (schema + security), make-admin.sql, showcase-data.sql,
-                    remove-demo-data.sql, and upgrade scripts for older projects
+supabase/           setup.sql (schema + security), create-admin.sql, make-admin.sql,
+                    showcase-data.sql, remove-demo-data.sql
+  upgrades/         one-time scripts for projects created with an older setup.sql
 scripts/            security-check.mjs (automated attack tests against the live backend)
 public/stickers/    Government character stickers
 public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
