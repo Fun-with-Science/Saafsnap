@@ -147,6 +147,7 @@ export function StoreProvider({ children }) {
     setHere(null)
     try {
       sessionStorage.removeItem('saafsnap.locationAsked')
+      sessionStorage.removeItem('saafsnap.snapHint')
     } catch {
       /* storage blocked */
     }

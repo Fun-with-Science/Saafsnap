@@ -9,6 +9,7 @@ import ErrorBoundary from './ErrorBoundary'
 import { PageLoader } from './ui'
 import { UserAvatar } from './Stickers'
 import { AI_MODE } from '../lib/ai'
+import { useSnapHint, PulseRings, HintBubble } from './SnapHint'
 
 const ROLE_LABEL = { citizen: 'Citizen', ngo: 'NGO', govt: 'Government', group: 'Group', admin: 'Admin' }
 
@@ -16,6 +17,7 @@ export default function AppShell() {
   const { me, reports, logout, dataMode } = useStore()
   const location = useLocation()
   const navigate = useNavigate()
+  const [hint, hideHint] = useSnapHint(location.pathname)
 
   const items = [
     { to: '/feed', label: 'Feed', icon: Home },
@@ -38,8 +40,10 @@ export default function AppShell() {
         <nav className="flex flex-1 flex-col gap-1.5">
           {[...items, ...extra].map((it) =>
             it.primary ? (
-              <NavLink key={it.to} to={it.to} className="btn btn-primary my-2 w-full">
+              <NavLink key={it.to} to={it.to} onClick={hideHint} className="btn btn-primary relative my-2 w-full">
+                {hint && <PulseRings round={false} />}
                 <it.icon size={20} strokeWidth={2.6} /> Snap a spot
+                {hint && <HintBubble side="right" onClose={hideHint} />}
               </NavLink>
             ) : (
               <NavLink
@@ -129,10 +133,14 @@ export default function AppShell() {
         <div className="mx-auto flex max-w-md items-end justify-between">
           {items.map((it) =>
             it.primary ? (
-              <NavLink key={it.to} to={it.to} className="-mt-7 flex flex-col items-center" aria-label="Snap a spot">
-                <motion.span whileTap={{ scale: 0.9 }} className="grid h-16 w-16 place-items-center rounded-full border-2 border-ink bg-leaf-500 text-white shadow-pop">
-                  <Camera size={28} strokeWidth={2.6} />
-                </motion.span>
+              <NavLink key={it.to} to={it.to} onClick={hideHint} className="relative -mt-7 flex flex-col items-center" aria-label="Snap a spot">
+                {hint && <HintBubble side="top" onClose={hideHint} />}
+                <span className="relative">
+                  {hint && <PulseRings />}
+                  <motion.span whileTap={{ scale: 0.9 }} className="relative grid h-16 w-16 place-items-center rounded-full border-2 border-ink bg-leaf-500 text-white shadow-pop">
+                    <Camera size={28} strokeWidth={2.6} />
+                  </motion.span>
+                </span>
                 <span className="mt-0.5 text-[11px] font-extrabold">Snap</span>
               </NavLink>
             ) : (
