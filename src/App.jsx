@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStore } from './lib/store'
@@ -10,37 +10,18 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Feed from './pages/Feed'
 import Profile from './pages/Profile'
+import NewReport from './pages/NewReport'
+import ReportDetail from './pages/ReportDetail'
+import MapPage from './pages/MapPage'
+import Leaders from './pages/Leaders'
+import Settings from './pages/Settings'
+import Activity from './pages/Activity'
 
-// Less-visited pages (and the map library) load separately, then get prefetched once the app is idle.
-const pages = {
-  Signup: () => import('./pages/Signup'),
-  NewReport: () => import('./pages/NewReport'),
-  ReportDetail: () => import('./pages/ReportDetail'),
-  MapPage: () => import('./pages/MapPage'),
-  Leaders: () => import('./pages/Leaders'),
-  Settings: () => import('./pages/Settings'),
-  Activity: () => import('./pages/Activity'),
-  DeptDesk: () => import('./pages/DeptDesk'),
-  Admin: () => import('./pages/Admin'),
-}
-const Signup = lazy(pages.Signup)
-const NewReport = lazy(pages.NewReport)
-const ReportDetail = lazy(pages.ReportDetail)
-const MapPage = lazy(pages.MapPage)
-const Leaders = lazy(pages.Leaders)
-const Settings = lazy(pages.Settings)
-const Activity = lazy(pages.Activity)
-const DeptDesk = lazy(pages.DeptDesk)
-const Admin = lazy(pages.Admin)
-
-function usePrefetchPages() {
-  useEffect(() => {
-    const run = () => Object.values(pages).forEach((load) => load().catch(() => {}))
-    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1500))
-    const id = idle(run)
-    return () => (window.cancelIdleCallback || clearTimeout)(id)
-  }, [])
-}
+// Main tabs ship with the app so switching tabs never waits on a download.
+// Only rarely used screens load on demand.
+const Signup = lazy(() => import('./pages/Signup'))
+const DeptDesk = lazy(() => import('./pages/DeptDesk'))
+const Admin = lazy(() => import('./pages/Admin'))
 
 
 function RequireAuth({ children, role }) {
@@ -56,7 +37,6 @@ export default function App() {
   const location = useLocation()
   const top = location.pathname.split('/')[1]
   const routeKey = ['', 'login', 'signup'].includes(top) ? location.pathname : 'app'
-  usePrefetchPages()
 
   if (!ready)
     return (
