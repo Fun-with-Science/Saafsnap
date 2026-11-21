@@ -36,6 +36,7 @@ const toReport = (r) => ({
   exif: r.exif,
   seenBy: r.seen_by || [],
   seenExtra: r.seen_extra,
+  likes: r.likes || [],
   status: r.status,
   timeline: r.timeline || [],
   cleanup: r.cleanup,
@@ -123,6 +124,10 @@ export const supabaseBackend = {
 
   async back(_me, id) {
     must(await sb.rpc('back_report', { rid: id }))
+  },
+
+  async toggleLike(_me, id) {
+    must(await sb.rpc('toggle_like', { rid: id }))
   },
 
   async startWork(_me, id) {

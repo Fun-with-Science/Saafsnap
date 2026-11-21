@@ -2,7 +2,7 @@
 import { get, set } from 'idb-keyval'
 import { buildSeed } from '../seed'
 import { hashPassword, newId } from '../auth'
-import { newReport, withSeen, withProgress, withCleanupResult } from '../reportOps'
+import { newReport, withSeen, withLike, withProgress, withCleanupResult } from '../reportOps'
 
 const SESSION_KEY = 'saafsnap.session'
 const DB_VERSION = 2
@@ -102,6 +102,10 @@ export const localBackend = {
 
   async back(me, id) {
     update(id, (r) => withSeen(r, me))
+  },
+
+  async toggleLike(me, id) {
+    update(id, (r) => withLike(r, me))
   },
 
   async startWork(me, id) {

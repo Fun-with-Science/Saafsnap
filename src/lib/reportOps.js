@@ -35,6 +35,12 @@ export function withSeen(r, me) {
   return { ...r, seenBy: [...r.seenBy, me.id], timeline: [...r.timeline, { type: 'seen', at: Date.now(), by: me.id, text: `${me.name} saw this too` }] }
 }
 
+export function withLike(r, me) {
+  if (r.status !== 'cleaned') return r
+  const likes = r.likes || []
+  return { ...r, likes: likes.includes(me.id) ? likes.filter((id) => id !== me.id) : [...likes, me.id] }
+}
+
 export function withProgress(r, me) {
   if (r.status !== 'assigned' || me.role !== 'govt' || me.status !== 'active' || me.org?.department !== r.department) return r
   return { ...r, status: 'in_progress', timeline: [...r.timeline, { type: 'progress', at: Date.now(), by: me.id, text: `${displayName(me)} acknowledged and started work` }] }

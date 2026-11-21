@@ -31,11 +31,15 @@ create table if not exists public.reports (
   exif jsonb,
   seen_by uuid[] not null default '{}',
   seen_extra int not null default 0,
+  likes uuid[] not null default '{}',
   status text not null default 'assigned' check (status in ('assigned', 'in_progress', 'cleaned')),
   timeline jsonb not null default '[]',
   cleanup jsonb,
   attempts jsonb not null default '[]'
 );
+
+-- Older databases: add the likes column if it is missing.
+alter table public.reports add column if not exists likes uuid[] not null default '{}';
 
 -- ───────────── Helpers ─────────────
 create or replace function public.is_admin() returns boolean
@@ -96,7 +100,7 @@ drop policy if exists "create own report" on public.reports;
 create policy "create own report" on public.reports for insert to authenticated with check (
   is_admin() or (
     created_by = auth.uid() and status = 'assigned' and cleanup is null
-    and seen_extra = 0 and cardinality(seen_by) = 0
+    and seen_extra = 0 and cardinality(seen_by) = 0 and cardinality(likes) = 0
   )
 );
 drop policy if exists "admins delete reports" on public.reports;
@@ -114,6 +118,15 @@ begin
     seen_by = array_append(seen_by, auth.uid()),
     timeline = timeline || jsonb_build_array(jsonb_build_object('type', 'seen', 'at', now_ms(), 'by', auth.uid(), 'text', nm || ' saw this too'))
   where id = rid and status <> 'cleaned' and created_by <> auth.uid() and not (auth.uid() = any (seen_by));
+end $$;
+
+-- Likes are only for cleaned spots: one per person, tapping again removes it.
+create or replace function public.toggle_like(rid uuid) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'Please log in first'; end if;
+  update reports set likes = case when auth.uid() = any (likes) then array_remove(likes, auth.uid()) else array_append(likes, auth.uid()) end
+  where id = rid and status = 'cleaned';
 end $$;
 
 create or replace function public.start_work(rid uuid) returns void
@@ -152,8 +165,8 @@ begin
   return ok;
 end $$;
 
-revoke execute on function public.back_report(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) from public, anon;
-grant execute on function public.back_report(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) to authenticated;
+revoke execute on function public.back_report(uuid), public.toggle_like(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) from public, anon;
+grant execute on function public.back_report(uuid), public.toggle_like(uuid), public.start_work(uuid), public.submit_cleanup(uuid, text, jsonb) to authenticated;
 
 -- ───────────── Photo storage ─────────────
 insert into storage.buckets (id, name, public) values ('photos', 'photos', true) on conflict (id) do nothing;

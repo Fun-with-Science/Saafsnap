@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { backend } from './backend'
 import { earnedBadgeIds, BADGE_MAP } from './badges'
 import { getPosition, locationPermission } from './image'
+import { withLike } from './reportOps'
 
 const Ctx = createContext(null)
 export const DATA_MODE = backend.mode
@@ -170,6 +171,22 @@ export function StoreProvider({ children }) {
     logout,
     createReport: (input) => act((u) => backend.createReport(u, input)),
     confirmSeen: (id) => act((u) => backend.back(u, id)).catch(() => {}),
+    toggleLike: (id) => {
+      const u = meRef.current
+      // Flip the heart immediately; the server copy catches up on refresh.
+      setReports((rs) => {
+        const next = rs.map((r) => (r.id === id ? withLike(r, u) : r))
+        reportsRef.current = next
+        return next
+      })
+      backend
+        .toggleLike(u, id)
+        .then(refresh)
+        .catch((err) => {
+          showError(err)
+          refresh().catch(() => {})
+        })
+    },
     startWork: (id) => act((u) => backend.startWork(u, id)).catch(() => {}),
     submitCleanup: (id, data) => {
       const r = reportsRef.current.find((x) => x.id === id)

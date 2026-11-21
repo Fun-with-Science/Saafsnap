@@ -1,6 +1,6 @@
 # Photo credits
 
-The demo report photos in [`public/seed/`](public/seed/) come from [Wikimedia Commons](https://commons.wikimedia.org/). Each photo was **cropped to 4:3 and resized to 1024×768**; no other changes were made. Each file keeps its original licence (linked below). Files under CC BY-SA can be reused under the same licence.
+The demo report photos in [`public/seed/`](public/seed/) come from [Wikimedia Commons](https://commons.wikimedia.org/). Each photo was **cropped to 4:3 and resized to 800×600**; no other changes were made. Each file keeps its original licence (linked below). Files under CC BY-SA can be reused under the same licence.
 
 Some photos were taken in other Indian cities and are used here only to illustrate the Kolkata demo reports.
 

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, Leaf } from 'lucide-react'
 import { LEVELS, STATUS } from '../lib/priority'
@@ -35,12 +36,37 @@ export function SeverityMeter({ value }) {
   )
 }
 
+// Fades in once decoded so photos never pop in half-drawn. The first posts load eagerly.
+export function Photo({ src, alt, className = '', eager = false }) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : 'auto'}
+      draggable={false}
+      onLoad={() => setLoaded(true)}
+      className={`${className} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+    />
+  )
+}
+
 export function Spinner({ size = 20, className = '' }) {
   return (
     <span
       className={`inline-block animate-spin rounded-full border-[3px] border-current border-t-transparent ${className}`}
       style={{ width: size, height: size }}
     />
+  )
+}
+
+export function PageLoader() {
+  return (
+    <div className="grid min-h-[40vh] place-items-center">
+      <Spinner size={28} className="text-leaf-500" />
+    </div>
   )
 }
 

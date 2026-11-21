@@ -1,5 +1,3 @@
-import exifr from 'exifr'
-
 export function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -10,7 +8,7 @@ export function loadImage(src) {
   })
 }
 
-export async function fileToDataUrl(file, maxDim = 1024, quality = 0.78) {
+export async function fileToDataUrl(file, maxDim = 960, quality = 0.72) {
   const url = URL.createObjectURL(file)
   try {
     const img = await loadImage(url)
@@ -41,6 +39,7 @@ export async function toJpegDataUrl(dataUrl, maxDim = 1024) {
 
 export async function readExif(file) {
   try {
+    const { default: exifr } = await import('exifr')
     const d = await exifr.parse(file, { gps: true })
     if (!d) return {}
     const taken = d.DateTimeOriginal || d.CreateDate
