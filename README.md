@@ -6,6 +6,8 @@
 
 **Snap the mess. We'll get it cleaned.**
 
+🏆 **Problem statement: PS03 · GreenBin – Smart Waste Management Assistant**
+
 One photo of garbage, a dirty river or a choked drain. Gemini works out what it is, how serious it is and which officer is responsible, then files the complaint for you. The public map turns red as more people report a spot, and stays red until someone uploads AI-verified proof that it was cleaned.
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
@@ -47,6 +49,21 @@ Best viewed on a phone (it works on desktop too).
 - **Government officer:** sign up as **Government** and pick a department, then log in as the admin and approve it in the Admin panel. That is the real verification flow.
 - The app asks for your location after login so the AI can tag where the photo was taken. You can say no and drop a pin on the map instead.
 - These are shared demo accounts. Please don't delete other people's reports.
+
+## Problem statement
+
+**PS03: GreenBin – Smart Waste Management Assistant**
+
+SaafSnap is our answer to PS03: an AI assistant that helps citizens, NGOs and the government manage waste in the city from the moment it is spotted to the moment it is cleaned.
+
+| What a smart waste assistant needs | How SaafSnap does it |
+|---|---|
+| Identify the waste | Gemini reads a photo and names the waste types, severity (1–10), volume and health risks |
+| Get it to the right people | The complaint is routed automatically to the responsible department and ward officer, with a drafted letter |
+| Prioritise what matters | Repeat reports, severity and deadlines raise a spot's priority, and missed deadlines escalate |
+| Make it visible | A public pollution map and feed show every open and cleaned spot |
+| Make sure it really gets cleaned | AI verifies the "after" photo (real, same place, recent, actually clean) before a spot turns green |
+| Keep people involved | Badges, points and a leaderboard reward NGOs, citizens and the government for verified cleanups |
 
 ## The problem
 
