@@ -99,7 +99,7 @@ The sidebar shows which AI and data mode is active.
 ### Supabase setup
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage, realtime and the demo accounts. It's safe to run again.
+2. Open **SQL Editor**, paste all of [`supabase/setup.sql`](supabase/setup.sql) and click **Run**. It creates the tables, security rules, photo storage, realtime and the demo accounts. It's safe to run again. If you ran an older copy of it, also run [`supabase/grants.sql`](supabase/grants.sql): new Supabase projects don't give the app access to new tables automatically.
 3. For quick testing, turn off **Authentication → Sign In / Providers → Email → Confirm email**.
 4. Put the project URL and anon key in `.env` and restart `npm run dev`.
 5. Log in as the admin and click **Load demo reports** on the Admin page.
