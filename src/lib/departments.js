@@ -60,7 +60,7 @@ export const DEPARTMENTS = {
     name: 'Veterinary & Carcass Removal',
     officer: 'Veterinary Officer',
     escalation: ['Veterinary Officer', 'Deputy Chief Veterinary Officer', 'Municipal Commissioner'],
-    covers: 'Dead animals, slaughter waste, animal dung heaps',
+    covers: 'Dead animals, stray cattle feeding at garbage dumps, slaughter waste, animal dung heaps',
     color: '#7c3aed',
     icon: PawPrint,
   },

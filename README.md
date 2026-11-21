@@ -138,6 +138,7 @@ src/
     store.jsx       App state, actions, badge celebrations
 supabase/setup.sql  Database schema, security rules, demo accounts
 public/stickers/    Government character stickers
+public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
 ```
 
 ## Security notes
@@ -146,6 +147,10 @@ public/stickers/    Government character stickers
 - Only admins can approve organisations or delete reports. Sign-ups can never make themselves admin.
 - Emails are visible only to their owner and admins.
 - The Gemini key is used from the browser, which is fine for a demo. For production, move the Gemini calls and cleanup verification into a Supabase Edge Function so the key stays secret and verification can't be faked.
+
+## Credits
+
+Demo report photos are from Wikimedia Commons under CC0 / CC BY / CC BY-SA licences. Authors and links are listed in [CREDITS.md](CREDITS.md).
 
 ## Roadmap
 

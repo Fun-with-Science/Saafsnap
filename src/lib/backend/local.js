@@ -5,7 +5,7 @@ import { hashPassword, newId } from '../auth'
 import { newReport, withSeen, withProgress, withCleanupResult } from '../reportOps'
 
 const SESSION_KEY = 'saafsnap.session'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let users = []
 let reports = []
