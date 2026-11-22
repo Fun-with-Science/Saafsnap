@@ -125,6 +125,7 @@ SaafSnap turns a messy, real-world input (a phone photo and a location) into a s
 - **Admin panel:** approve or reject organisations, moderate reports
 - **Organisation logos:** NGOs, groups and government accounts upload their own logo in Settings
 - **Mobile first:** bottom tab bar with a big camera button, tested down to 320 px wide
+- **Android app:** installable APK with camera and location permissions, built automatically on every push
 
 ## Tech stack
 
@@ -222,6 +223,22 @@ The sidebar shows which AI and data mode is active.
 
 Projects created with an older `setup.sql` should also run the scripts in [`supabase/upgrades/`](supabase/upgrades) once: `grants.sql`, `likes.sql`, `hardening.sql`, `avatars.sql`.
 
+## Android app (APK)
+
+SaafSnap also ships as a native Android app built with [Capacitor](https://capacitorjs.com). It opens the live app full-screen with its own icon and splash screen, and asks Android for camera and location permission, so it always runs the latest version.
+
+**Get the APK:** every push to `main` builds it on GitHub Actions. Open **Actions → Android APK → the latest run → Artifacts → SaafSnap-apk**, unzip it and install `SaafSnap.apk` on your phone (allow "Install unknown apps" for your browser or file manager when Android asks).
+
+**Build it yourself** (needs JDK 21 and the Android SDK):
+
+```bash
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug   # APK in android/app/build/outputs/apk/debug/
+```
+
+The Android project lives in [`android/`](android) and its settings in [`capacitor.config.json`](capacitor.config.json). The workflow is [`.github/workflows/android.yml`](.github/workflows/android.yml).
+
 ## Offline demo mode
 
 When you run it locally without Supabase settings, the app works entirely in the browser with 19 demo reports and these logins (one-tap buttons on the login page):
@@ -257,7 +274,8 @@ supabase/           setup.sql (schema + security), create-admin.sql, make-admin.
   upgrades/         one-time scripts for projects created with an older setup.sql
 tests/              Vitest unit and component tests
 scripts/            security-check.mjs (automated attack tests against the live backend)
-.github/workflows/  CI: lint, tests and build on every push
+.github/workflows/  CI (lint, tests, build) and the Android APK build
+android/            Native Android project (Capacitor)
 public/stickers/    Government character stickers
 public/seed/        Demo report photos (Wikimedia Commons, see CREDITS.md)
 ```
