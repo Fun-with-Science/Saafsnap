@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { MapPin, Lock } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Modal, IconBox, Spinner } from './ui'
+import { LOCATION_FIX } from '../lib/image'
 
 const ASKED_KEY = 'saafsnap.locationAsked'
 
@@ -54,7 +55,7 @@ export default function LocationPrompt() {
         <h2 className="mt-4 text-2xl font-extrabold">{blocked ? 'Location is blocked' : 'Turn on location'}</h2>
         {blocked ? (
           <p className="mt-2 font-semibold text-ink/60">
-            Your browser is blocking location for SaafSnap. Tap the lock icon next to the website address, allow <b>Location</b>, then reload. You can still drop a pin on the map by hand.
+            Location is turned off for SaafSnap. {LOCATION_FIX} You can still drop a pin on the map by hand.
           </p>
         ) : (
           <p className="mt-2 font-semibold text-ink/60">

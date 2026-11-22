@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Crosshair, MapPin, RefreshCw, Send, Sparkles, AlertTriangle, Share2, Camera, FileText, Clock, Package, Trees, Eye, Mail } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { analyzeReport } from '../lib/ai'
-import { fileToDataUrl, readExif } from '../lib/image'
+import { fileToDataUrl, readExif, LOCATION_FIX } from '../lib/image'
 import { DEPARTMENTS } from '../lib/departments'
 import { findDuplicate, priority } from '../lib/priority'
 import PhotoPicker from '../components/PhotoPicker'
@@ -148,7 +148,7 @@ export default function NewReport() {
                 {locState === 'ok' && loc && `${loc.source === 'gps' ? 'Your GPS location' : loc.source === 'photo' ? 'Location from the photo' : 'Pinned on the map'} · drag the pin or tap the map to adjust.`}
                 {locState === 'failed' && !loc &&
                   (locPerm === 'denied'
-                    ? 'Location is blocked in your browser. Allow it from the lock icon next to the address, or tap the map to drop a pin.'
+                    ? `Location is blocked. ${LOCATION_FIX} Or tap the map to drop a pin.`
                     : "Couldn't get your location. Tap on the map to drop a pin where the garbage is.")}
               </p>
               <PickMap value={loc} onChange={(v) => { setLoc(v); setLocState('ok') }} className="mt-3 h-56 overflow-hidden rounded-2xl border-2 border-ink" />

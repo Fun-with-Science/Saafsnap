@@ -5,7 +5,7 @@ import { ArrowLeft, ChevronRight, History, MapPin, Mail, UserRound, ShieldCheck,
 import { useStore } from '../lib/store'
 import { IconBox, Spinner } from '../components/ui'
 import { UserAvatar } from '../components/Stickers'
-import { fileToLogo } from '../lib/image'
+import { fileToLogo, LOCATION_FIX } from '../lib/image'
 import { ROLE } from './Profile'
 
 const LOC_TEXT = { granted: 'On', prompt: 'Off', denied: 'Blocked in browser', unsupported: 'Not supported', unknown: 'Checking…' }
@@ -122,7 +122,7 @@ export default function Settings() {
               icon={MapPin}
               color="coral"
               title="Location"
-              detail={locPerm === 'denied' ? 'Allow it from the lock icon next to the website address' : LOC_TEXT[locPerm]}
+              detail={locPerm === 'denied' ? LOCATION_FIX : LOC_TEXT[locPerm]}
               right={
                 locPerm === 'prompt' ? (
                   <button className="btn btn-primary btn-sm" onClick={turnOnLocation} disabled={locating}>

@@ -1,0 +1,13 @@
+{
+  "appId": "com.saafsnap.app",
+  "appName": "SaafSnap",
+  "webDir": "dist",
+  "server": {
+    "url": "https://saafsnap.vercel.app",
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#fffaf2",
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

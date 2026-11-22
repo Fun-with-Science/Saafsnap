@@ -132,7 +132,7 @@ export default function AppShell() {
       <LocationPrompt />
 
       {/* Mobile bottom nav */}
-      <nav aria-label="Main" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink/10 bg-white/95 px-2 pt-1.5 backdrop-blur md:hidden">
+      <nav aria-label="Main" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink/10 bg-white px-2 pt-1.5 md:hidden">
         <div className="mx-auto flex max-w-md items-end justify-between">
           {items.map((it) =>
             it.primary ? (

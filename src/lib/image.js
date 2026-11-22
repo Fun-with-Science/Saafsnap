@@ -88,6 +88,14 @@ export async function readExif(file) {
 }
 
 // 'granted' | 'prompt' | 'denied' | 'unsupported'. Browsers without the Permissions API report 'prompt'.
+// True inside the Android app (Capacitor), false in a normal browser.
+export const IN_APP = typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.()
+
+// How to re-enable a blocked location permission, in the words of the current platform.
+export const LOCATION_FIX = IN_APP
+  ? "Open your phone's Settings → Apps → SaafSnap → Permissions → Location and allow it."
+  : 'Tap the lock icon next to the website address, allow Location, then reload.'
+
 export async function locationPermission() {
   if (!navigator.geolocation) return 'unsupported'
   try {
